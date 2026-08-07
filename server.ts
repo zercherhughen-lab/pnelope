@@ -267,7 +267,7 @@ app.get('/api/stats', authenticateToken, (req, res) => {
 async function syncServicesWithInsForge() {
   try {
     const dbServices = await insforge.getAllServices();
-    if (Array.isArray(dbServices)) {
+    if (Array.isArray(dbServices) && dbServices.length > 0) {
       const freshServices: DBService[] = dbServices
         .filter((record: any) => {
           if (!record) return false;
@@ -290,41 +290,39 @@ async function syncServicesWithInsForge() {
             apiKey: String(record.api_key || record.apiKey || generateApiKey()),
             secretId: String(record.secret_id || record.secretId || generateSecretId()),
             createdAt: String(record.created_at || record.createdAt || new Date().toISOString()),
+            discordBotToken: String(record.discord_bot_token || ''),
+            discordGuildId: String(record.discord_guild_id || ''),
+            discordRoleId: String(record.discord_role_id || ''),
+            discordRoleName: String(record.discord_role_name || ''),
+            discordBotEnabled: Boolean(record.discord_bot_enabled),
           };
         });
 
-      const freshIds = new Set(freshServices.map((f) => f.id));
-      const freshNames = new Set(freshServices.map((f) => f.name.toLowerCase()));
+      if (freshServices.length > 0) {
+        const freshIds = new Set(freshServices.map((f) => f.id));
+        const freshNames = new Set(freshServices.map((f) => f.name.toLowerCase()));
 
-      // Purge any local service that is no longer in InsForge or is a system table
-      for (let i = services.length - 1; i >= 0; i--) {
-        const current = services[i];
-        const cName = current.name.toLowerCase();
-        const cId = current.id.toLowerCase();
-        const isSystem = cName.includes('vauth_services') || cName.includes('vauth services') || cId.includes('vauth_services');
-        const existsInFresh = freshIds.has(current.id) || freshNames.has(cName);
-
-        if (isSystem || !existsInFresh) {
-          const deletedSrv = services.splice(i, 1)[0];
-          // Clean up associated in-memory licenses and ranks
-          for (let j = licenses.length - 1; j >= 0; j--) {
-            if (licenses[j].serviceId === deletedSrv.id) licenses.splice(j, 1);
-          }
-          for (let j = ranks.length - 1; j >= 0; j--) {
-            if (ranks[j].serviceId === deletedSrv.id) ranks.splice(j, 1);
+        // Purge system table remnants
+        for (let i = services.length - 1; i >= 0; i--) {
+          const current = services[i];
+          const cName = current.name.toLowerCase();
+          const cId = current.id.toLowerCase();
+          const isSystem = cName.includes('vauth_services') || cName.includes('vauth services') || cId.includes('vauth_services');
+          if (isSystem) {
+            services.splice(i, 1);
           }
         }
-      }
 
-      // Update or add fresh services
-      for (const fresh of freshServices) {
-        const idx = services.findIndex(
-          (s) => s.id === fresh.id || s.name.toLowerCase() === fresh.name.toLowerCase()
-        );
-        if (idx !== -1) {
-          services[idx] = { ...services[idx], ...fresh };
-        } else {
-          services.push(fresh);
+        // Update or add fresh services
+        for (const fresh of freshServices) {
+          const idx = services.findIndex(
+            (s) => s.id === fresh.id || s.name.toLowerCase() === fresh.name.toLowerCase()
+          );
+          if (idx !== -1) {
+            services[idx] = { ...services[idx], ...fresh };
+          } else {
+            services.push(fresh);
+          }
         }
       }
     }
