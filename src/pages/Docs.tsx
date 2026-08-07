@@ -575,12 +575,71 @@ class Program
         </div>
       </section>
 
-      {/* Section 3: Verification Endpoint for Loaders */}
+      {/* Section 3: Discord Bot Official Integration */}
+      <section className="space-y-4 pt-6 border-t border-white/10">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-[#5865F2]/20 text-[#5865F2] border border-[#5865F2]/30">DISCORD BOT</span>
+            <h2 className="text-xl font-semibold text-white">3. Bot Oficial de Discord (Slash Commands & Developer Portal)</h2>
+          </div>
+          <p className="text-sm text-zinc-400">
+            Conecta tu propio bot de Discord para que tus clientes con un rol específico puedan reclamar su licencia automáticamente y resetear su HWID sin intervención manual.
+          </p>
+        </div>
+
+        {/* Discord Bot Rules Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="p-4 rounded-xl border border-white/10 bg-[#111110] space-y-1">
+            <span className="text-[10px] uppercase font-bold text-indigo-400">1. Límite Estricto</span>
+            <p className="text-xs text-white font-semibold">1 Licencia por Cuenta de Discord</p>
+            <p className="text-[11px] text-zinc-400">Si el usuario ya tiene una clave generada, el bot rechazará reclamos adicionales.</p>
+          </div>
+          <div className="p-4 rounded-xl border border-white/10 bg-[#111110] space-y-1">
+            <span className="text-[10px] uppercase font-bold text-amber-400">2. Rol Exclusivo</span>
+            <p className="text-xs text-white font-semibold">Verificación de Rol en el Servidor</p>
+            <p className="text-[11px] text-zinc-400">Solo usuarios con el rol configurado en la web podrán ejecutar /claim.</p>
+          </div>
+          <div className="p-4 rounded-xl border border-white/10 bg-[#111110] space-y-1">
+            <span className="text-[10px] uppercase font-bold text-emerald-400">3. Auto-Reset HWID</span>
+            <p className="text-xs text-white font-semibold">Comando /resethwid</p>
+            <p className="text-[11px] text-zinc-400">Al proporcionar su key y usuario, el bot borra el HWID vinculado para pasar a otra PC.</p>
+          </div>
+        </div>
+
+        {/* Step-by-Step Setup Guide */}
+        <div className="p-4 rounded-xl border border-white/10 bg-zinc-950/60 space-y-3">
+          <h3 className="text-xs font-bold text-white uppercase tracking-wider">Pasos para Configurar en Discord Developer Portal:</h3>
+          <ol className="list-decimal list-inside space-y-1.5 text-xs text-zinc-300">
+            <li>Entra a <a href="https://discord.com/developers/applications" target="_blank" rel="noreferrer" className="text-indigo-400 underline font-mono">discord.com/developers/applications</a> y crea una <strong>New Application</strong>.</li>
+            <li>En la pestaña <strong>Bot</strong>, haz clic en <strong>Reset Token</strong> y copia tu <strong>Bot Token</strong>.</li>
+            <li>En la misma pestaña activa los <strong>Privileged Gateway Intents</strong> (especialmente <strong>Server Members Intent</strong>).</li>
+            <li>Pega tu <strong>Bot Token</strong> y el nombre de tu <strong>Rol Requerido</strong> en la sección del servicio en esta web.</li>
+            <li>Ejecuta el script del bot en tu servidor/PC: <code className="text-emerald-400 font-mono">node discord_bot.js</code> o <code className="text-emerald-400 font-mono">python discord_bot.py</code>.</li>
+          </ol>
+        </div>
+
+        {/* Endpoints Table */}
+        <div className="p-4 rounded-xl border border-white/10 bg-[#111110] space-y-2">
+          <span className="text-xs font-semibold text-white">Endpoints Especializados para Discord:</span>
+          <div className="space-y-1.5 text-xs font-mono">
+            <div className="flex items-center justify-between p-2 rounded bg-black/40 border border-white/5">
+              <span className="text-indigo-400">POST /api/v1/discord/claim</span>
+              <span className="text-zinc-400 text-[11px]">Crea usuario y key vinculados a la cuenta de Discord</span>
+            </div>
+            <div className="flex items-center justify-between p-2 rounded bg-black/40 border border-white/5">
+              <span className="text-emerald-400">POST /api/v1/discord/resethwid</span>
+              <span className="text-zinc-400 text-[11px]">Resetea y elimina el HWID para vincular a una nueva PC</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 4: Verification Endpoint for Loaders */}
       <section className="space-y-4 pt-6 border-t border-white/10">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">POST</span>
-            <h2 className="text-xl font-semibold text-white">3. Validación de Key en Software / Loader (/api/verify)</h2>
+            <h2 className="text-xl font-semibold text-white">4. Validación de Key en Software / Loader (/api/verify)</h2>
           </div>
           <p className="text-sm text-zinc-400">
             Utilizado por el ejecutable/loader para validar una key individual antes de dar acceso al programa.
@@ -589,7 +648,7 @@ class Program
         <CodeBlock code={curlVerifyExample} lang="bash" />
       </section>
 
-      {/* Section 4: Interactive Live API Tester */}
+      {/* Section 5: Interactive Live API Tester */}
       <section className="space-y-4 pt-6 border-t border-white/10">
         <div className="space-y-1">
           <h2 className="text-xl font-semibold text-white flex items-center gap-2">

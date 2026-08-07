@@ -49,6 +49,11 @@ interface DBService {
   apiKey: string;
   secretId: string;
   createdAt: string;
+  discordBotToken?: string;
+  discordGuildId?: string;
+  discordRoleId?: string;
+  discordRoleName?: string;
+  discordBotEnabled?: boolean;
 }
 
 interface DBLicense {
@@ -64,6 +69,8 @@ interface DBLicense {
   notes: string;
   createdAt: string;
   lastUsedAt: string | null;
+  discordUserId?: string | null;
+  discordUsername?: string | null;
 }
 
 interface DBRank {
@@ -346,6 +353,11 @@ app.get('/api/services', authenticateToken, async (req, res) => {
       created_at: s.createdAt,
       licenses_count: srvLicenses.length,
       ranks_count: srvRanks.length,
+      discord_bot_token: srv.discordBotToken || '',
+      discord_guild_id: srv.discordGuildId || '',
+      discord_role_id: srv.discordRoleId || '',
+      discord_role_name: srv.discordRoleName || '',
+      discord_bot_enabled: srv.discordBotEnabled || false,
     };
   });
 
@@ -371,6 +383,11 @@ app.post('/api/services', authenticateToken, async (req, res) => {
     apiKey,
     secretId,
     createdAt: new Date().toISOString(),
+    discordBotToken: '',
+    discordGuildId: '',
+    discordRoleId: '',
+    discordRoleName: '',
+    discordBotEnabled: false,
   };
 
   services.push(newSrv);
@@ -403,6 +420,11 @@ app.post('/api/services', authenticateToken, async (req, res) => {
       created_at: newSrv.createdAt,
       licenses_count: 0,
       ranks_count: 0,
+      discord_bot_token: '',
+      discord_guild_id: '',
+      discord_role_id: '',
+      discord_role_name: '',
+      discord_bot_enabled: false,
     },
     api_key: apiKey,
     secret_id: secretId,
@@ -434,6 +456,46 @@ app.get('/api/services/:id', authenticateToken, async (req, res) => {
     created_at: srv.createdAt,
     licenses_count: srvLicenses.length,
     ranks_count: srvRanks.length,
+    discord_bot_token: srv.discordBotToken || '',
+    discord_guild_id: srv.discordGuildId || '',
+    discord_role_id: srv.discordRoleId || '',
+    discord_role_name: srv.discordRoleName || '',
+    discord_bot_enabled: srv.discordBotEnabled || false,
+  });
+});
+
+app.patch('/api/services/:id/discord', authenticateToken, async (req, res) => {
+  const user = (req as any).user as DBUser;
+  const srv = services.find((s) => s.id === req.params.id && (s.userId === user.id || s.userId === 'user-demo-1' || !s.userId));
+  if (!srv) {
+    return res.status(404).json({ detail: 'Service not found' });
+  }
+
+  const { discord_bot_token, discord_guild_id, discord_role_id, discord_role_name, discord_bot_enabled } = req.body;
+  if (discord_bot_token !== undefined) srv.discordBotToken = discord_bot_token.trim();
+  if (discord_guild_id !== undefined) srv.discordGuildId = discord_guild_id.trim();
+  if (discord_role_id !== undefined) srv.discordRoleId = discord_role_id.trim();
+  if (discord_role_name !== undefined) srv.discordRoleName = discord_role_name.trim();
+  if (discord_bot_enabled !== undefined) srv.discordBotEnabled = Boolean(discord_bot_enabled);
+
+  await insforge.updateServiceRecord(srv.id, {
+    discord_bot_token: srv.discordBotToken,
+    discord_guild_id: srv.discordGuildId,
+    discord_role_id: srv.discordRoleId,
+    discord_role_name: srv.discordRoleName,
+    discord_bot_enabled: srv.discordBotEnabled,
+  });
+
+  return res.json({
+    success: true,
+    message: 'Configuración de Discord Bot guardada exitosamente',
+    discord: {
+      discord_bot_token: srv.discordBotToken,
+      discord_guild_id: srv.discordGuildId,
+      discord_role_id: srv.discordRoleId,
+      discord_role_name: srv.discordRoleName,
+      discord_bot_enabled: srv.discordBotEnabled,
+    }
   });
 });
 
@@ -1050,6 +1112,279 @@ app.all(['/api/v1/service/query', '/api/service/query', '/api/v1/service/info'],
 
   return res.json({
     users: mappedKeys,
+  });
+});
+
+// DISCORD BOT ENDPOINT: CLAIM LICENSE (1 PER DISCORD USER, ROLE VERIFICATION, UNIQUE USERNAME)
+app.all(['/api/v1/discord/claim', '/api/discord/claim'], async (req, res) => {
+  if (services.length === 0) {
+    await syncServicesWithInsForge();
+  }
+
+  const headerApiKey = (req.headers['api-key'] as string) || (req.headers['x-api-key'] as string);
+  const headerSecretId = (req.headers['secret-id'] as string) || (req.headers['x-secret-id'] as string);
+  const headerService = (req.headers['service'] as string) || (req.headers['x-service'] as string) || (req.headers['service-name'] as string);
+
+  const {
+    api_key,
+    secret_id,
+    service,
+    service_name,
+    service_id,
+    discord_user_id,
+    discord_username,
+    username,
+    user_roles,
+    roles,
+    duration,
+    rank
+  } = req.body || {};
+
+  const apiKey = headerApiKey || api_key || (req.query.api_key as string);
+  const secretId = headerSecretId || secret_id || (req.query.secret_id as string);
+  const serviceParam = headerService || service || service_name || service_id || (req.query.service as string);
+
+  if (!apiKey || !secretId || !serviceParam) {
+    return res.status(401).json({
+      success: false,
+      detail: "Acceso denegado: Se requieren los 3 parámetros de verificación ('api_key', 'secret_id', 'service')."
+    });
+  }
+
+  const srv = services.find((s) => 
+    s.apiKey === apiKey && 
+    s.secretId === secretId && 
+    (s.name.toLowerCase() === serviceParam.trim().toLowerCase() || s.id === serviceParam.trim())
+  );
+
+  if (!srv) {
+    return res.status(401).json({
+      success: false,
+      detail: "Credenciales o nombre de servicio incorrectos."
+    });
+  }
+
+  if (!discord_user_id) {
+    return res.status(400).json({
+      success: false,
+      detail: "Se requiere el ID de Discord del usuario (discord_user_id)."
+    });
+  }
+
+  if (!username || !String(username).trim()) {
+    return res.status(400).json({
+      success: false,
+      detail: "Debes ingresar el nombre de usuario deseado para tu licencia."
+    });
+  }
+
+  const cleanUsername = String(username).trim();
+
+  // Verificación de Rol de Discord (si está configurado en el servicio)
+  if (srv.discordRoleId || srv.discordRoleName) {
+    const userRoleList: string[] = Array.isArray(roles) ? roles : (Array.isArray(user_roles) ? user_roles : []);
+    const reqRoleId = srv.discordRoleId ? srv.discordRoleId.trim() : null;
+    const reqRoleName = srv.discordRoleName ? srv.discordRoleName.trim().toLowerCase() : null;
+
+    const hasRole = userRoleList.some((r: string) => {
+      if (!r) return false;
+      const cleanR = String(r).trim();
+      return (reqRoleId && cleanR === reqRoleId) || (reqRoleName && cleanR.toLowerCase() === reqRoleName);
+    });
+
+    if (!hasRole && userRoleList.length > 0) {
+      return res.status(403).json({
+        success: false,
+        detail: `No tienes el rol de Discord requerido (${srv.discordRoleName || srv.discordRoleId}) para reclamar tu licencia.`
+      });
+    }
+  }
+
+  // Regla 1: Estrictamente 1 sola key por cuenta de Discord
+  const existingForDiscord = licenses.find(
+    (l) => l.serviceId === srv.id && l.discordUserId === String(discord_user_id)
+  );
+
+  if (existingForDiscord) {
+    return res.status(409).json({
+      success: false,
+      detail: `Tu cuenta de Discord ya tiene una licencia activa asignada (${existingForDiscord.key}). Solo se permite 1 licencia por usuario.`,
+      license_key: existingForDiscord.key,
+      username: existingForDiscord.username,
+      expires_at: existingForDiscord.expiresAt,
+      status: existingForDiscord.status
+    });
+  }
+
+  // Regla 2: Unicidad del nombre de usuario en este servicio
+  const existingUsername = licenses.find(
+    (l) => l.serviceId === srv.id && l.username.toLowerCase() === cleanUsername.toLowerCase()
+  );
+
+  if (existingUsername) {
+    return res.status(409).json({
+      success: false,
+      detail: `El nombre de usuario '${cleanUsername}' ya está en uso. Por favor elige otro nombre de usuario.`
+    });
+  }
+
+  const key = generateKey(srv.prefix || 'VAUTH');
+  let expiresAt: string | null = null;
+  const finalDuration = duration || '30 Days';
+
+  if (finalDuration.toLowerCase() !== 'lifetime') {
+    expiresAt = calculateExpirationDate(finalDuration);
+  }
+
+  const newLic: DBLicense = {
+    id: 'lic-' + Date.now(),
+    serviceId: srv.id,
+    key,
+    username: cleanUsername,
+    duration: finalDuration,
+    expiresAt,
+    status: 'active',
+    rank: rank || 'Default',
+    hwid: null,
+    notes: `Creado vía Bot de Discord por @${discord_username || discord_user_id}`,
+    createdAt: new Date().toISOString(),
+    lastUsedAt: null,
+    discordUserId: String(discord_user_id),
+    discordUsername: discord_username ? String(discord_username) : null,
+  };
+
+  licenses.push(newLic);
+
+  const tableName = insforge.getTableNameForService(srv.name);
+  await insforge.insertRecord(tableName, {
+    license_key: newLic.key,
+    username: newLic.username,
+    duration: newLic.duration,
+    status: newLic.status,
+    rank: newLic.rank,
+    hwid: newLic.hwid,
+    notes: newLic.notes,
+    expires_at: newLic.expiresAt,
+    last_used_at: newLic.lastUsedAt,
+    discord_user_id: newLic.discordUserId,
+    discord_username: newLic.discordUsername,
+  });
+
+  return res.json({
+    success: true,
+    message: "¡Licencia creada exitosamente y vinculada a tu cuenta de Discord!",
+    user: {
+      username: newLic.username,
+      license_key: newLic.key,
+      hwid: null,
+      status: newLic.status,
+      is_banned: false,
+      is_expired: false,
+      rank: newLic.rank,
+      duration: newLic.duration,
+      expires_at: newLic.expiresAt || 'Lifetime',
+      discord_user_id: newLic.discordUserId,
+      discord_username: newLic.discordUsername
+    }
+  });
+});
+
+// DISCORD BOT ENDPOINT: RESET HWID (VERIFICACIÓN DE KEY + USUARIO + CUENTA DE DISCORD)
+app.all(['/api/v1/discord/resethwid', '/api/discord/resethwid'], async (req, res) => {
+  if (services.length === 0) {
+    await syncServicesWithInsForge();
+  }
+
+  const headerApiKey = (req.headers['api-key'] as string) || (req.headers['x-api-key'] as string);
+  const headerSecretId = (req.headers['secret-id'] as string) || (req.headers['x-secret-id'] as string);
+  const headerService = (req.headers['service'] as string) || (req.headers['x-service'] as string) || (req.headers['service-name'] as string);
+
+  const {
+    api_key,
+    secret_id,
+    service,
+    service_name,
+    service_id,
+    discord_user_id,
+    license_key,
+    key,
+    username
+  } = req.body || {};
+
+  const apiKey = headerApiKey || api_key || (req.query.api_key as string);
+  const secretId = headerSecretId || secret_id || (req.query.secret_id as string);
+  const serviceParam = headerService || service || service_name || service_id || (req.query.service as string);
+  const targetKey = license_key || key;
+
+  if (!apiKey || !secretId || !serviceParam) {
+    return res.status(401).json({
+      success: false,
+      detail: "Acceso denegado: Se requieren 'api_key', 'secret_id' y 'service'."
+    });
+  }
+
+  const srv = services.find((s) => 
+    s.apiKey === apiKey && 
+    s.secretId === secretId && 
+    (s.name.toLowerCase() === serviceParam.trim().toLowerCase() || s.id === serviceParam.trim())
+  );
+
+  if (!srv) {
+    return res.status(401).json({
+      success: false,
+      detail: "Credenciales o nombre de servicio incorrectos."
+    });
+  }
+
+  if (!targetKey || !username) {
+    return res.status(400).json({
+      success: false,
+      detail: "Debes proporcionar tu Licencia (key) y tu Usuario (username) correctos para resetear tu HWID."
+    });
+  }
+
+  const cleanUsername = String(username).trim();
+
+  // Buscar coincidencia exacta
+  const lic = licenses.find(
+    (l) => l.serviceId === srv.id && 
+           l.key.toUpperCase() === String(targetKey).trim().toUpperCase() && 
+           l.username.toLowerCase() === cleanUsername.toLowerCase()
+  );
+
+  if (!lic) {
+    return res.status(404).json({
+      success: false,
+      detail: "Licencia o nombre de usuario incorrectos. No se encontró ninguna coincidencia en este servicio."
+    });
+  }
+
+  // Validar pertenencia a Discord si ya estaba vinculada
+  if (discord_user_id && lic.discordUserId && lic.discordUserId !== String(discord_user_id)) {
+    return res.status(403).json({
+      success: false,
+      detail: "Esta licencia pertenece a otra cuenta de Discord. No tienes permiso para resetear su HWID."
+    });
+  }
+
+  // Resetear HWID a null
+  const previousHwid = lic.hwid;
+  lic.hwid = null;
+
+  const tableName = insforge.getTableNameForService(srv.name);
+  await insforge.updateRecordByKey(tableName, lic.key, { hwid: null });
+
+  return res.json({
+    success: true,
+    message: "¡HWID reseteado con éxito! Se ha eliminado el HWID vinculado. Ahora puedes abrir el software en tu nuevo equipo.",
+    user: {
+      username: lic.username,
+      license_key: lic.key,
+      hwid: null,
+      previous_hwid: previousHwid,
+      status: lic.status,
+      expires_at: lic.expiresAt || 'Lifetime'
+    }
   });
 });
 

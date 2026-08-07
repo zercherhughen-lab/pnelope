@@ -119,6 +119,15 @@ export const ServiceDetail: React.FC = () => {
   const [editingLic, setEditingLic] = useState<License | null>(null);
   const [editDurationVal, setEditDurationVal] = useState('30 Days');
 
+  // Discord Bot Integration State
+  const [discordToken, setDiscordToken] = useState('');
+  const [discordGuildId, setDiscordGuildId] = useState('');
+  const [discordRoleId, setDiscordRoleId] = useState('');
+  const [discordRoleName, setDiscordRoleName] = useState('');
+  const [discordEnabled, setDiscordEnabled] = useState(false);
+  const [savingDiscord, setSavingDiscord] = useState(false);
+  const [showDiscordToken, setShowDiscordToken] = useState(false);
+
   const fetchServiceData = async () => {
     if (!id) return;
     try {
@@ -128,6 +137,13 @@ export const ServiceDetail: React.FC = () => {
         api.get(`/services/${id}/ranks`),
       ]);
       setService(srvRes.data);
+      if (srvRes.data) {
+        setDiscordToken(srvRes.data.discord_bot_token || '');
+        setDiscordGuildId(srvRes.data.discord_guild_id || '');
+        setDiscordRoleId(srvRes.data.discord_role_id || '');
+        setDiscordRoleName(srvRes.data.discord_role_name || '');
+        setDiscordEnabled(Boolean(srvRes.data.discord_bot_enabled));
+      }
       setLicenses(licRes.data);
       setRanks(rankRes.data);
       if (rankRes.data && rankRes.data.length > 0) {
@@ -139,6 +155,27 @@ export const ServiceDetail: React.FC = () => {
       toast.error(formatErr(err.response?.data?.detail));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveDiscordConfig = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id) return;
+    setSavingDiscord(true);
+    try {
+      await api.patch(`/services/${id}/discord`, {
+        discord_bot_token: discordToken,
+        discord_guild_id: discordGuildId,
+        discord_role_id: discordRoleId,
+        discord_role_name: discordRoleName,
+        discord_bot_enabled: discordEnabled,
+      });
+      toast.success('Configuración del Bot de Discord guardada con éxito');
+      fetchServiceData();
+    } catch (err: any) {
+      toast.error(formatErr(err.response?.data?.detail));
+    } finally {
+      setSavingDiscord(false);
     }
   };
 
@@ -431,6 +468,131 @@ export const ServiceDetail: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <CredentialCard label="API Key" value={service.api_key} testid="api-key-card" />
         <CredentialCard label="Secret ID" value={service.secret_id} testid="secret-id-card" />
+      </div>
+
+      {/* Discord Bot & Developer Portal Integration */}
+      <div className="rounded-xl border border-indigo-500/30 bg-gradient-to-b from-indigo-950/20 to-[#111110] p-6 space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="flex size-[36px] items-center justify-center rounded-[10px] bg-[#5865F2]/20 border border-[#5865F2]/40 text-[#5865F2]">
+              <Shield className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="font-semibold text-white text-base">Bot Oficial de Discord (Portal Developer)</h2>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#5865F2]/20 text-[#5865F2] border border-[#5865F2]/30">
+                  Slash Commands (/claim, /resethwid)
+                </span>
+              </div>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                Genera usuarios y licencias automáticas (1 por cuenta de Discord con rol específico) y permite auto-reset de HWID.
+              </p>
+            </div>
+          </div>
+
+          <label className="flex items-center gap-2.5 cursor-pointer self-start sm:self-auto bg-black/40 px-3 py-1.5 rounded-lg border border-white/10">
+            <span className="text-xs font-medium text-zinc-300">Estado del Bot:</span>
+            <input
+              type="checkbox"
+              checked={discordEnabled}
+              onChange={(e) => setDiscordEnabled(e.target.checked)}
+              className="accent-indigo-500 w-4 h-4 cursor-pointer"
+            />
+            <span className={`text-xs font-bold ${discordEnabled ? 'text-emerald-400' : 'text-zinc-500'}`}>
+              {discordEnabled ? 'ACTIVO' : 'INACTIVO'}
+            </span>
+          </label>
+        </div>
+
+        {/* Security Rule Badges */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+          <div className="p-3 rounded-lg border border-white/10 bg-black/40 space-y-1">
+            <span className="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">Regla 1: Límite por Cuenta</span>
+            <p className="text-zinc-300 font-medium">1 Sola Key por Usuario</p>
+            <p className="text-[11px] text-zinc-500">Bloquea reclamos duplicados por misma cuenta de Discord.</p>
+          </div>
+          <div className="p-3 rounded-lg border border-white/10 bg-black/40 space-y-1">
+            <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider">Regla 2: Rol Obligatorio</span>
+            <p className="text-zinc-300 font-medium">{discordRoleName || discordRoleId || 'Rol Exclusivo'}</p>
+            <p className="text-[11px] text-zinc-500">Solo usuarios con el rol configurado pueden usar /claim.</p>
+          </div>
+          <div className="p-3 rounded-lg border border-white/10 bg-black/40 space-y-1">
+            <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Regla 3: Auto-Reset HWID</span>
+            <p className="text-zinc-300 font-medium">Comando /resethwid</p>
+            <p className="text-[11px] text-zinc-500">Elimina el HWID vinculado para pasar a una nueva PC.</p>
+          </div>
+        </div>
+
+        {/* Configuration Form */}
+        <form onSubmit={handleSaveDiscordConfig} className="space-y-4 pt-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-zinc-300">Discord Bot Token (Developer Portal)</label>
+                <button
+                  type="button"
+                  onClick={() => setShowDiscordToken(!showDiscordToken)}
+                  className="text-[11px] text-indigo-400 hover:text-indigo-300"
+                >
+                  {showDiscordToken ? 'Ocultar' : 'Revelar Token'}
+                </button>
+              </div>
+              <input
+                type={showDiscordToken ? 'text' : 'password'}
+                value={discordToken}
+                onChange={(e) => setDiscordToken(e.target.value)}
+                placeholder="MTI5... (Token de tu aplicación de Discord)"
+                className="w-full bg-zinc-950 border border-white/10 focus:border-indigo-500 rounded-lg px-3.5 py-2 text-xs text-white font-mono outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-zinc-300">Server ID / Guild ID (Opcional)</label>
+              <input
+                type="text"
+                value={discordGuildId}
+                onChange={(e) => setDiscordGuildId(e.target.value)}
+                placeholder="123456789012345678 (ID de tu servidor de Discord)"
+                className="w-full bg-zinc-950 border border-white/10 focus:border-indigo-500 rounded-lg px-3.5 py-2 text-xs text-white font-mono outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-zinc-300">Nombre del Rol Requerido en Discord</label>
+              <input
+                type="text"
+                value={discordRoleName}
+                onChange={(e) => setDiscordRoleName(e.target.value)}
+                placeholder="ej. Cliente, Comprador, VIP"
+                className="w-full bg-zinc-950 border border-white/10 focus:border-indigo-500 rounded-lg px-3.5 py-2 text-xs text-white outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-zinc-300">ID del Rol Requerido en Discord (Opcional)</label>
+              <input
+                type="text"
+                value={discordRoleId}
+                onChange={(e) => setDiscordRoleId(e.target.value)}
+                placeholder="109876543210987654 (Role ID numérico)"
+                className="w-full bg-zinc-950 border border-white/10 focus:border-indigo-500 rounded-lg px-3.5 py-2 text-xs text-white font-mono outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+            <div className="text-[11px] text-zinc-400">
+              * Comandos incluidos en el script: <code className="text-indigo-300 font-mono">/claim &lt;usuario&gt;</code> y <code className="text-indigo-300 font-mono">/resethwid &lt;key&gt; &lt;usuario&gt;</code>.
+            </div>
+            <button
+              type="submit"
+              disabled={savingDiscord}
+              className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-lg text-xs font-bold transition-colors duration-200"
+            >
+              {savingDiscord ? 'Guardando...' : 'Guardar Configuración de Discord'}
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* Ranks Management Section */}

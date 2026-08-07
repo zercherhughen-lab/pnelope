@@ -16,6 +16,11 @@ export interface Service {
   created_at: string;
   licenses_count?: number;
   ranks_count?: number;
+  discord_bot_token?: string;
+  discord_guild_id?: string;
+  discord_role_id?: string;
+  discord_role_name?: string;
+  discord_bot_enabled?: boolean;
 }
 
 export interface License {
@@ -31,6 +36,8 @@ export interface License {
   notes?: string;
   created_at: string;
   last_used_at?: string | null;
+  discord_user_id?: string | null;
+  discord_username?: string | null;
 }
 
 export interface Rank {
