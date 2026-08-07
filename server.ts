@@ -2,7 +2,6 @@ import express from 'express';
 import path from 'path';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
-import { createServer as createViteServer } from 'vite';
 import * as insforge from './insforge.js';
 
 const app = express();
@@ -1417,6 +1416,7 @@ async function startServer() {
   });
 
   if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
