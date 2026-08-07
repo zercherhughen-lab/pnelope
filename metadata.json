@@ -1,0 +1,8 @@
+{
+  "name": "v2",
+  "description": "Virtual Auth API \u0026 Developer Key Management Platform for managing service credentials, licenses, and API keys.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
