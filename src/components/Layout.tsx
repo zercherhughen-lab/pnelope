@@ -70,9 +70,9 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           to="/dashboard"
           data-testid="brand-link"
           onClick={() => setMobileMenuOpen(false)}
-          className="flex items-center hover:bg-white/5 transition-colors duration-200 group rounded-lg p-1"
+          className="flex items-center p-1 pointer-events-auto"
         >
-          <VapeLogo height={22} className="ml-1 mt-0.5 group-hover:scale-105 transition-transform duration-200" />
+          <VapeLogo height={22} className="ml-1 mt-0.5" />
         </NavLink>
 
         {/* Mobile close button */}

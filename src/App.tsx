@@ -53,6 +53,64 @@ const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) 
 };
 
 export default function App() {
+  React.useEffect(() => {
+    // 1. Bloqueo de click derecho
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      return false;
+    };
+
+    // 2. Bloqueo de teclas de inspección y herramientas de desarrollo
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Bloquear F12
+      if (e.key === 'F12' || e.keyCode === 123) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+
+      const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+      const key = e.key.toLowerCase();
+
+      // Bloquear Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C (DevTools Inspect & Console)
+      if (isCtrlOrCmd && e.shiftKey && (key === 'i' || key === 'j' || key === 'c')) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+
+      // Bloquear Ctrl+U (Ver código fuente)
+      if (isCtrlOrCmd && key === 'u') {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+
+      // Bloquear Ctrl+S (Guardar página)
+      if (isCtrlOrCmd && key === 's') {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+    };
+
+    // 3. Bloqueo de arrastre de imágenes y elementos
+    const handleDragStart = (e: DragEvent) => {
+      e.preventDefault();
+      return false;
+    };
+
+    window.addEventListener('contextmenu', handleContextMenu);
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('dragstart', handleDragStart);
+
+    return () => {
+      window.removeEventListener('contextmenu', handleContextMenu);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('dragstart', handleDragStart);
+    };
+  }, []);
+
   return (
     <BrowserRouter>
       <AuthProvider>
