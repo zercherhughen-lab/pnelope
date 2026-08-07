@@ -1049,20 +1049,6 @@ app.all(['/api/v1/service/query', '/api/service/query', '/api/v1/service/info'],
   });
 
   return res.json({
-    success: true,
-    service: {
-      id: srv.id,
-      name: srv.name,
-      prefix: srv.prefix,
-      description: srv.description,
-      api_key: srv.apiKey,
-      secret_id: srv.secretId,
-      total_keys: mappedKeys.length,
-      active_keys: mappedKeys.filter((k) => k.status === 'active').length,
-      banned_keys: mappedKeys.filter((k) => k.is_banned).length,
-      expired_keys: mappedKeys.filter((k) => k.is_expired).length,
-    },
-    licenses: mappedKeys,
     users: mappedKeys,
   });
 });

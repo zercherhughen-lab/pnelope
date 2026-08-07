@@ -103,7 +103,7 @@ class Program
 
 url = "${origin}/api/v1/service/query"
 
-# Los 3 parametros son obligatorios para obtener la informacion del servicio
+# Los 3 parametros son obligatorios para consultar los usuarios y licencias
 payload = {
     "api_key": "8f2a91c4b7d3e05f6a8b9c0d1e2f3a4b",
     "secret_id": "sec_9a8b7c6d5e4f3a2b1c0d9e8f",
@@ -113,12 +113,9 @@ payload = {
 response = requests.post(url, json=payload)
 data = response.json()
 
-if data.get("success"):
-    print(f"Servicio: {data['service']['name']}")
-    for lic in data.get("licenses", []):
-        print(f"Usuario: {lic['username']} | Key: {lic['license_key']} | HWID: {lic['hwid']} | Status: {lic['status']} | Expira: {lic['expires_at']}")
-else:
-    print("Error de autenticación:", data.get("detail"))`;
+users = data.get("users", [])
+for user in users:
+    print(f"Usuario: {user['username']} | Key: {user['license_key']} | HWID: {user['hwid']} | Status: {user['status']} | Expira: {user['expires_at']}")`;
 
   const nodeQueryExample = `const fetch = require('node-fetch');
 
@@ -354,28 +351,17 @@ int main() {
         <div className="space-y-1">
           <h2 className="text-xl font-semibold text-white">Respuesta Esperada de la API (JSON)</h2>
           <p className="text-sm text-zinc-400">
-            Cuando la llamada proporciona los 3 datos correctos, la API devuelve únicamente la información requerida de las licencias. La cuenta regresiva del tiempo de caducidad de cada clave se activa en su <strong className="text-amber-300">primer uso / canje en un PC</strong>.
+            Al enviar los 3 parámetros correctos, la API devuelve directamente el listado de usuarios con sus licencias y estados:
           </p>
         </div>
         <CodeBlock
           code={`{
-  "success": true,
-  "service": {
-    "id": "srv-vape-default",
-    "name": "Vape",
-    "prefix": "VAPE",
-    "description": "Vape Developer Service Scope",
-    "total_keys": 2,
-    "active_keys": 1,
-    "banned_keys": 0,
-    "expired_keys": 0
-  },
-  "licenses": [
+  "users": [
     {
       "username": "Alex_Vape",
       "license_key": "VAPE-8F9A-2B3C-4D5E",
       "hwid": "HWID-9876-5432-1098",
-      "status": "paused",
+      "status": "active",
       "is_banned": false,
       "is_expired": false,
       "rank": "VIP",
