@@ -46,7 +46,7 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     fetchServices();
     const interval = setInterval(() => {
       fetchServices();
-    }, 1000);
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 

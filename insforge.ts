@@ -34,14 +34,13 @@ export async function ensureServicesTable(): Promise<boolean> {
       {
         tableName: 'vauth_services',
         columns: [
-          { columnName: 'id', type: 'string', isNullable: false, isUnique: true },
+          { columnName: 'service_id', type: 'string', isNullable: false, isUnique: true },
           { columnName: 'user_id', type: 'string', isNullable: false, isUnique: false },
           { columnName: 'name', type: 'string', isNullable: false, isUnique: true },
           { columnName: 'prefix', type: 'string', isNullable: true, isUnique: false },
           { columnName: 'description', type: 'string', isNullable: true, isUnique: false },
           { columnName: 'api_key', type: 'string', isNullable: false, isUnique: true },
           { columnName: 'secret_id', type: 'string', isNullable: false, isUnique: true },
-          { columnName: 'created_at', type: 'string', isNullable: true, isUnique: false },
         ],
       },
       { headers: getHeaders(), timeout: 5000 }
@@ -65,17 +64,108 @@ function extractArray(data: any): any[] {
   return [];
 }
 
+function isSystemTable(tableName: string): boolean {
+  if (!tableName) return true;
+  const lower = tableName.toLowerCase().trim();
+  return (
+    lower === 'vauth_services' ||
+    lower === 'vauth services' ||
+    lower === 'public.vauth_services' ||
+    lower.startsWith('vauth_') ||
+    lower.includes('vauth_services')
+  );
+}
+
 /**
- * Fetch all persistent services from InsForge
+ * Fetch all persistent services from InsForge with 1:1 table synchronization
  */
 export async function getAllServices(): Promise<any[]> {
   try {
     await ensureServicesTable();
-    const res = await axios.get(`${INSFORGE_BASE_URL}/api/database/records/vauth_services`, {
-      headers: getHeaders(),
-      timeout: 5000,
-    });
-    return extractArray(res.data);
+    let records: any[] = [];
+    try {
+      const res = await axios.get(`${INSFORGE_BASE_URL}/api/database/records/vauth_services`, {
+        headers: getHeaders(),
+        timeout: 5000,
+      });
+      records = extractArray(res.data);
+    } catch {
+      records = [];
+    }
+
+    // Get current tables in InsForge database
+    let tablesList: string[] = [];
+    try {
+      const tablesRes = await axios.get(`${INSFORGE_BASE_URL}/api/database/tables`, {
+        headers: getHeaders(),
+        timeout: 5000,
+      });
+      const rawTables = Array.isArray(tablesRes.data) ? tablesRes.data : extractArray(tablesRes.data);
+      tablesList = rawTables
+        .map((t: any) => (typeof t === 'string' ? t : t.tableName || t.table_name || ''))
+        .filter((t: string) => t && !isSystemTable(t));
+    } catch {
+      tablesList = [];
+    }
+
+    const currentTableSet = new Set(tablesList);
+
+    // 1. Discover new tables created directly in InsForge UI
+    for (const tName of tablesList) {
+      const existing = records.find((r) => {
+        const expected = getTableNameForService(r.name || r.service_name || '');
+        const fallback = (r.service_id || r.id || '').replace(/^srv-/, '');
+        return expected === tName || fallback === tName || r.name?.toLowerCase() === tName;
+      });
+
+      if (!existing) {
+        const formattedName = tName.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+        const cleanPrefix = tName.slice(0, 4).toUpperCase();
+        const autoService = {
+          service_id: `srv-${tName}`,
+          user_id: 'user-demo-1',
+          name: formattedName,
+          prefix: cleanPrefix,
+          description: `Servicio recuperado de la tabla ${tName}`,
+          api_key: `vauth_live_${tName}_${Date.now()}`,
+          secret_id: `sec_${tName}_${Date.now()}`,
+        };
+        records.push(autoService);
+        insertServiceRecord(autoService).catch(() => {});
+        ensureServiceTable(tName).catch(() => {});
+      }
+    }
+
+    // 2. Remove services whose table was deleted in InsForge UI
+    const validRecords: any[] = [];
+    for (const r of records) {
+      const name = (r.name || r.service_name || '').toLowerCase();
+      const sId = (r.service_id || r.id || '').toLowerCase();
+
+      // Ignore and clean up any internal system records
+      if (isSystemTable(name) || isSystemTable(sId)) {
+        const targetId = r.service_id || r.id;
+        if (targetId) deleteServiceRecord(targetId).catch(() => {});
+        continue;
+      }
+
+      const expected = getTableNameForService(r.name || r.service_name || '');
+      const fallback = (r.service_id || r.id || '').replace(/^srv-/, '');
+      const tableExists = currentTableSet.has(expected) || currentTableSet.has(fallback) || currentTableSet.has(r.name?.toLowerCase());
+
+      if (tableExists) {
+        validRecords.push(r);
+      } else {
+        // Table was deleted in InsForge UI -> remove record from vauth_services
+        const targetId = r.service_id || r.id;
+        if (targetId) {
+          deleteServiceRecord(targetId).catch(() => {});
+        }
+      }
+    }
+    records = validRecords;
+
+    return records;
   } catch (error: any) {
     return [];
   }
@@ -87,15 +177,25 @@ export async function getAllServices(): Promise<any[]> {
 export async function insertServiceRecord(data: Record<string, any>): Promise<any> {
   try {
     await ensureServicesTable();
-    const res = await axios.post(`${INSFORGE_BASE_URL}/api/database/records/vauth_services`, data, {
+    const payload: Record<string, any> = {
+      service_id: data.service_id || data.id,
+      user_id: data.user_id || data.userId || 'user-demo-1',
+      name: data.name,
+      prefix: data.prefix,
+      description: data.description || '',
+      api_key: data.api_key || data.apiKey,
+      secret_id: data.secret_id || data.secretId,
+    };
+    const res = await axios.post(`${INSFORGE_BASE_URL}/api/database/records/vauth_services`, payload, {
       headers: getHeaders(),
       timeout: 10000,
     });
     return res.data;
   } catch (error: any) {
-    if (data.id) {
+    const targetId = data.service_id || data.id;
+    if (targetId) {
       try {
-        await updateServiceRecord(data.id, data);
+        await updateServiceRecord(targetId, data);
         return data;
       } catch {
         // ignore fallback update error
@@ -114,7 +214,7 @@ export async function deleteServiceRecord(serviceId: string): Promise<boolean> {
     const tableExists = await ensureServicesTable();
     if (!tableExists) return false;
     await axios.delete(
-      `${INSFORGE_BASE_URL}/api/database/records/vauth_services?id=eq.${encodeURIComponent(serviceId)}`,
+      `${INSFORGE_BASE_URL}/api/database/records/vauth_services?service_id=eq.${encodeURIComponent(serviceId)}`,
       { headers: getHeaders(), timeout: 5000 }
     );
     return true;
@@ -131,7 +231,7 @@ export async function updateServiceRecord(serviceId: string, updates: Record<str
     const tableExists = await ensureServicesTable();
     if (!tableExists) return false;
     await axios.patch(
-      `${INSFORGE_BASE_URL}/api/database/records/vauth_services?id=eq.${encodeURIComponent(serviceId)}`,
+      `${INSFORGE_BASE_URL}/api/database/records/vauth_services?service_id=eq.${encodeURIComponent(serviceId)}`,
       updates,
       { headers: getHeaders(), timeout: 5000 }
     );

@@ -260,13 +260,22 @@ app.get('/api/stats', authenticateToken, (req, res) => {
 async function syncServicesWithInsForge() {
   try {
     const dbServices = await insforge.getAllServices();
-    if (Array.isArray(dbServices) && dbServices.length > 0) {
+    if (Array.isArray(dbServices)) {
       const freshServices: DBService[] = dbServices
-        .filter((record: any) => record && (record.name || record.service_name || record.title || record.service || record.id))
+        .filter((record: any) => {
+          if (!record) return false;
+          const sName = String(record.name || record.service_name || record.title || record.service || '').toLowerCase();
+          const sId = String(record.service_id || record.id || '').toLowerCase();
+          if (sName.includes('vauth_services') || sName.includes('vauth services') || sId.includes('vauth_services')) {
+            return false;
+          }
+          return sName.length > 0 || sId.length > 0;
+        })
         .map((record: any) => {
           const sName = record.name || record.service_name || record.title || record.service || 'Servicio';
+          const sId = String(record.service_id || record.id || 'srv-' + Date.now());
           return {
-            id: String(record.id || 'srv-' + Date.now()),
+            id: sId,
             userId: record.user_id || record.userId || 'user-demo-1',
             name: String(sName),
             prefix: String(record.prefix || sName.slice(0, 3)).toUpperCase(),
@@ -277,6 +286,30 @@ async function syncServicesWithInsForge() {
           };
         });
 
+      const freshIds = new Set(freshServices.map((f) => f.id));
+      const freshNames = new Set(freshServices.map((f) => f.name.toLowerCase()));
+
+      // Purge any local service that is no longer in InsForge or is a system table
+      for (let i = services.length - 1; i >= 0; i--) {
+        const current = services[i];
+        const cName = current.name.toLowerCase();
+        const cId = current.id.toLowerCase();
+        const isSystem = cName.includes('vauth_services') || cName.includes('vauth services') || cId.includes('vauth_services');
+        const existsInFresh = freshIds.has(current.id) || freshNames.has(cName);
+
+        if (isSystem || !existsInFresh) {
+          const deletedSrv = services.splice(i, 1)[0];
+          // Clean up associated in-memory licenses and ranks
+          for (let j = licenses.length - 1; j >= 0; j--) {
+            if (licenses[j].serviceId === deletedSrv.id) licenses.splice(j, 1);
+          }
+          for (let j = ranks.length - 1; j >= 0; j--) {
+            if (ranks[j].serviceId === deletedSrv.id) ranks.splice(j, 1);
+          }
+        }
+      }
+
+      // Update or add fresh services
       for (const fresh of freshServices) {
         const idx = services.findIndex(
           (s) => s.id === fresh.id || s.name.toLowerCase() === fresh.name.toLowerCase()
@@ -344,7 +377,7 @@ app.post('/api/services', authenticateToken, async (req, res) => {
 
   // Persist service to InsForge master table
   await insforge.insertServiceRecord({
-    id: newSrv.id,
+    service_id: newSrv.id,
     user_id: newSrv.userId,
     name: newSrv.name,
     prefix: newSrv.prefix,
