@@ -37,11 +37,15 @@ export const Docs: React.FC = () => {
 
   // Collapsible Categories for code snippets
   const [expandedSnippets, setExpandedSnippets] = useState<{ [key: string]: boolean }>({
-    csharp: true,
-    python: false,
+    csharp: false,
+    python: true,
     cpp: false,
     node: false,
     curl: false,
+    create_python: true,
+    create_node: false,
+    create_csharp: false,
+    create_curl: false,
   });
 
   const toggleSnippet = (key: string) => {
@@ -164,6 +168,94 @@ int main() {
     }
     return 0;
 }`;
+
+  // Examples for external creation of licenses (/api/v1/license/create)
+  const pythonCreateExample = `import requests
+
+url = "${origin}/api/v1/license/create"
+
+# Los 3 parámetros de verificación obligatorios + datos de la nueva clave
+payload = {
+    "api_key": "8f2a91c4b7d3e05f6a8b9c0d1e2f3a4b",
+    "secret_id": "sec_9a8b7c6d5e4f3a2b1c0d9e8f",
+    "service": "Vape",              # Nombre o ID exacto del servicio
+    "username": "cliente_discord",  # Usuario o ID del comprador
+    "duration": "30 Days",          # "30 Days", "Lifetime", "1 Year", "10 Seconds", etc.
+    "rank": "VIP",                  # Rango asignado (opcional)
+    "notes": "Compra automática vía Webhook / Bot"
+}
+
+response = requests.post(url, json=payload)
+data = response.json()
+
+if data.get("success"):
+    user = data.get("user")
+    print(f"Licencia Creada: {user['license_key']}")
+    print(f"Usuario: {user['username']} | Expira: {user['expires_at']}")
+else:
+    print("Error:", data.get("detail"))`;
+
+  const nodeCreateExample = `const fetch = require('node-fetch');
+
+async function crearLicenciaExterna() {
+  const res = await fetch('${origin}/api/v1/license/create', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      api_key: '8f2a91c4b7d3e05f6a8b9c0d1e2f3a4b',
+      secret_id: 'sec_9a8b7c6d5e4f3a2b1c0d9e8f',
+      service: 'Vape',
+      username: 'comprador_auto',
+      duration: '30 Days',
+      rank: 'Default'
+    })
+  });
+
+  const data = await res.json();
+  console.log(data);
+}
+
+crearLicenciaExterna();`;
+
+  const csharpCreateExample = `using System;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+
+class Program 
+{
+    static async Task Main() 
+    {
+        var client = new HttpClient();
+        var url = "${origin}/api/v1/license/create";
+
+        var json = @"{
+            ""api_key"": ""8f2a91c4b7d3e05f6a8b9c0d1e2f3a4b"",
+            ""secret_id"": ""sec_9a8b7c6d5e4f3a2b1c0d9e8f"",
+            ""service"": ""Vape"",
+            ""username"": ""cliente_csharp"",
+            ""duration"": ""Lifetime"",
+            ""rank"": ""VIP""
+        }";
+
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        var response = await client.PostAsync(url, content);
+        var result = await response.Content.ReadAsStringAsync();
+
+        Console.WriteLine(result);
+    }
+}`;
+
+  const curlCreateExample = `curl -X POST "${origin}/api/v1/license/create" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "api_key": "8f2a91c4b7d3e05f6a8b9c0d1e2f3a4b",
+    "secret_id": "sec_9a8b7c6d5e4f3a2b1c0d9e8f",
+    "service": "Vape",
+    "username": "cliente_nuevo",
+    "duration": "30 Days",
+    "rank": "Default"
+  }'`;
 
   // Verification example for loaders
   const curlVerifyExample = `curl -X POST "${origin}/api/verify" \\
@@ -385,12 +477,110 @@ int main() {
         />
       </section>
 
-      {/* Section 2: Verification Endpoint for Loaders */}
+      {/* Section 2: External License & User Creation Endpoint */}
+      <section className="space-y-4 pt-6 border-t border-white/10">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">POST</span>
+            <h2 className="text-xl font-semibold text-white">2. Creación Externa de Licencias y Usuarios (/api/v1/license/create)</h2>
+          </div>
+          <p className="text-sm text-zinc-400">
+            Permite que programas externos (Bots de Discord/Telegram, tiendas automáticas, webhooks o pasarelas de pago) creen usuarios y generen licencias automáticamente usando los 3 parámetros de verificación obligatorios.
+          </p>
+        </div>
+
+        {/* Creation Snippets Accordion */}
+        <div className="space-y-3">
+          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Ejemplos para Generar Licencias Externamente:</p>
+
+          {/* Python Create */}
+          <div className="border border-white/10 rounded-lg overflow-hidden bg-[#111110]">
+            <button
+              type="button"
+              onClick={() => toggleSnippet('create_python')}
+              className="w-full px-4 py-2.5 flex items-center justify-between bg-zinc-900/60 hover:bg-zinc-900 text-left transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Terminal className="w-4 h-4 text-amber-400" />
+                <span className="text-xs font-semibold text-white">Creación con Python (requests)</span>
+              </div>
+              {expandedSnippets.create_python ? <ChevronDown className="w-4 h-4 text-zinc-400" /> : <ChevronRight className="w-4 h-4 text-zinc-400" />}
+            </button>
+            {expandedSnippets.create_python && (
+              <div className="p-3 border-t border-white/10">
+                <CodeBlock code={pythonCreateExample} lang="python" />
+              </div>
+            )}
+          </div>
+
+          {/* Node.js Create */}
+          <div className="border border-white/10 rounded-lg overflow-hidden bg-[#111110]">
+            <button
+              type="button"
+              onClick={() => toggleSnippet('create_node')}
+              className="w-full px-4 py-2.5 flex items-center justify-between bg-zinc-900/60 hover:bg-zinc-900 text-left transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Code className="w-4 h-4 text-yellow-400" />
+                <span className="text-xs font-semibold text-white">Creación con Node.js / JavaScript</span>
+              </div>
+              {expandedSnippets.create_node ? <ChevronDown className="w-4 h-4 text-zinc-400" /> : <ChevronRight className="w-4 h-4 text-zinc-400" />}
+            </button>
+            {expandedSnippets.create_node && (
+              <div className="p-3 border-t border-white/10">
+                <CodeBlock code={nodeCreateExample} lang="javascript" />
+              </div>
+            )}
+          </div>
+
+          {/* C# Create */}
+          <div className="border border-white/10 rounded-lg overflow-hidden bg-[#111110]">
+            <button
+              type="button"
+              onClick={() => toggleSnippet('create_csharp')}
+              className="w-full px-4 py-2.5 flex items-center justify-between bg-zinc-900/60 hover:bg-zinc-900 text-left transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Code className="w-4 h-4 text-indigo-400" />
+                <span className="text-xs font-semibold text-white">Creación con C# (.NET)</span>
+              </div>
+              {expandedSnippets.create_csharp ? <ChevronDown className="w-4 h-4 text-zinc-400" /> : <ChevronRight className="w-4 h-4 text-zinc-400" />}
+            </button>
+            {expandedSnippets.create_csharp && (
+              <div className="p-3 border-t border-white/10">
+                <CodeBlock code={csharpCreateExample} lang="csharp" />
+              </div>
+            )}
+          </div>
+
+          {/* cURL Create */}
+          <div className="border border-white/10 rounded-lg overflow-hidden bg-[#111110]">
+            <button
+              type="button"
+              onClick={() => toggleSnippet('create_curl')}
+              className="w-full px-4 py-2.5 flex items-center justify-between bg-zinc-900/60 hover:bg-zinc-900 text-left transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Terminal className="w-4 h-4 text-zinc-400" />
+                <span className="text-xs font-semibold text-white">Comando cURL para Generar Licencia</span>
+              </div>
+              {expandedSnippets.create_curl ? <ChevronDown className="w-4 h-4 text-zinc-400" /> : <ChevronRight className="w-4 h-4 text-zinc-400" />}
+            </button>
+            {expandedSnippets.create_curl && (
+              <div className="p-3 border-t border-white/10">
+                <CodeBlock code={curlCreateExample} lang="bash" />
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Section 3: Verification Endpoint for Loaders */}
       <section className="space-y-4 pt-6 border-t border-white/10">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">POST</span>
-            <h2 className="text-xl font-semibold text-white">2. Validación de Key en Software / Loader (/api/verify)</h2>
+            <h2 className="text-xl font-semibold text-white">3. Validación de Key en Software / Loader (/api/verify)</h2>
           </div>
           <p className="text-sm text-zinc-400">
             Utilizado por el ejecutable/loader para validar una key individual antes de dar acceso al programa.
@@ -399,7 +589,7 @@ int main() {
         <CodeBlock code={curlVerifyExample} lang="bash" />
       </section>
 
-      {/* Section 3: Interactive Live API Tester */}
+      {/* Section 4: Interactive Live API Tester */}
       <section className="space-y-4 pt-6 border-t border-white/10">
         <div className="space-y-1">
           <h2 className="text-xl font-semibold text-white flex items-center gap-2">

@@ -1244,17 +1244,46 @@ app.get('/api/licenses', async (req, res) => {
   return res.json({ service: srv.name, licenses: list });
 });
 
-app.post('/api/create-license', async (req, res) => {
+app.all(['/api/v1/license/create', '/api/create-license', '/api/v1/licenses/create'], async (req, res) => {
+  if (services.length === 0) {
+    await syncServicesWithInsForge();
+  }
+
   const headerApiKey = (req.headers['api-key'] as string) || (req.headers['x-api-key'] as string);
   const headerSecretId = (req.headers['secret-id'] as string) || (req.headers['x-secret-id'] as string);
-  const { api_key, secret_id, username, duration, duration_days, rank, hwid, notes } = req.body || {};
+  const headerService = (req.headers['service'] as string) || (req.headers['x-service'] as string) || (req.headers['service-name'] as string);
 
-  const apiKey = headerApiKey || api_key;
-  const secretId = headerSecretId || secret_id;
+  const { api_key, secret_id, service, service_name, service_id, username, duration, duration_days, rank, hwid, notes } = req.body || {};
 
-  const srv = services.find((s) => (apiKey && s.apiKey === apiKey) || (secretId && s.secretId === secretId));
+  const apiKey = headerApiKey || api_key || (req.query.api_key as string);
+  const secretId = headerSecretId || secret_id || (req.query.secret_id as string);
+  const serviceParam = headerService || service || service_name || service_id || (req.query.service as string);
+
+  // Exigir los 3 parámetros obligatorios
+  if (!apiKey || !secretId || !serviceParam) {
+    return res.status(401).json({
+      success: false,
+      detail: "Acceso denegado: Para crear licencias se requieren los 3 parámetros obligatorios: 'api_key', 'secret_id' y 'service'.",
+      required_credentials: ["api_key", "secret_id", "service"],
+      provided_status: {
+        api_key: apiKey ? "provided" : "missing",
+        secret_id: secretId ? "provided" : "missing",
+        service: serviceParam ? "provided" : "missing"
+      }
+    });
+  }
+
+  const srv = services.find((s) => 
+    s.apiKey === apiKey && 
+    s.secretId === secretId && 
+    (s.name.toLowerCase() === serviceParam.trim().toLowerCase() || s.id === serviceParam.trim())
+  );
+
   if (!srv) {
-    return res.status(401).json({ detail: 'Invalid API key' });
+    return res.status(401).json({
+      success: false,
+      detail: "Credenciales o nombre de servicio incorrectos. Los 3 valores deben coincidir."
+    });
   }
 
   const key = generateKey(srv.prefix || 'VAUTH');
@@ -1269,7 +1298,7 @@ app.post('/api/create-license', async (req, res) => {
     id: 'lic-' + Date.now(),
     serviceId: srv.id,
     key,
-    username: username || 'unassigned',
+    username: username ? String(username).trim() : 'unassigned',
     duration: duration || (daysNum > 0 ? `${daysNum} Days` : 'Lifetime'),
     expiresAt,
     status: 'active',
@@ -1296,36 +1325,55 @@ app.post('/api/create-license', async (req, res) => {
   });
 
   return res.json({
-    id: newLic.id,
-    license_key: newLic.key,
-    key: newLic.key,
-    username: newLic.username,
-    status: newLic.status,
-    hwid: newLic.hwid,
-    rank: newLic.rank,
-    notes: newLic.notes,
-    expires_at: newLic.expiresAt,
-    created_at: newLic.createdAt,
+    success: true,
+    message: "Licencia y usuario creados exitosamente",
+    user: {
+      username: newLic.username,
+      license_key: newLic.key,
+      hwid: newLic.hwid,
+      status: newLic.status,
+      is_banned: false,
+      is_expired: false,
+      rank: newLic.rank,
+      duration: newLic.duration,
+      expires_at: newLic.expiresAt || (newLic.duration === 'Lifetime' ? 'Lifetime' : 'Pendiente de activación'),
+      created_at: newLic.createdAt
+    }
   });
 });
 
-app.post('/api/update-license', async (req, res) => {
+app.all(['/api/v1/license/update', '/api/update-license'], async (req, res) => {
   const headerApiKey = (req.headers['api-key'] as string) || (req.headers['x-api-key'] as string);
   const headerSecretId = (req.headers['secret-id'] as string) || (req.headers['x-secret-id'] as string);
-  const { api_key, secret_id, key, license_key, status, hwid, username, rank, notes, duration_days } = req.body || {};
+  const headerService = (req.headers['service'] as string) || (req.headers['x-service'] as string) || (req.headers['service-name'] as string);
 
-  const apiKey = headerApiKey || api_key;
-  const secretId = headerSecretId || secret_id;
-  const targetKey = license_key || key;
+  const { api_key, secret_id, service, service_name, service_id, key, license_key, status, hwid, username, rank, notes, duration_days } = req.body || {};
 
-  const srv = services.find((s) => (apiKey && s.apiKey === apiKey) || (secretId && s.secretId === secretId));
+  const apiKey = headerApiKey || api_key || (req.query.api_key as string);
+  const secretId = headerSecretId || secret_id || (req.query.secret_id as string);
+  const serviceParam = headerService || service || service_name || service_id || (req.query.service as string);
+  const targetKey = license_key || key || (req.query.license_key as string) || (req.query.key as string);
+
+  if (!apiKey || !secretId || !serviceParam) {
+    return res.status(401).json({
+      success: false,
+      detail: "Acceso denegado: Se requieren 'api_key', 'secret_id' y 'service' para actualizar licencias."
+    });
+  }
+
+  const srv = services.find((s) => 
+    s.apiKey === apiKey && 
+    s.secretId === secretId && 
+    (s.name.toLowerCase() === serviceParam.trim().toLowerCase() || s.id === serviceParam.trim())
+  );
+
   if (!srv) {
-    return res.status(401).json({ detail: 'Invalid API key' });
+    return res.status(401).json({ detail: 'Credenciales o servicio incorrectos' });
   }
 
   const lic = licenses.find((l) => l.serviceId === srv.id && l.key === targetKey);
   if (!lic) {
-    return res.status(404).json({ detail: 'License not found' });
+    return res.status(404).json({ detail: 'Licencia no encontrada' });
   }
 
   const updates: Record<string, any> = {};
@@ -1344,29 +1392,45 @@ app.post('/api/update-license', async (req, res) => {
   await insforge.updateRecordByKey(tableName, lic.key, updates);
 
   return res.json({
-    id: lic.id,
-    license_key: lic.key,
-    key: lic.key,
-    username: lic.username,
-    status: lic.status,
-    hwid: lic.hwid,
-    rank: lic.rank,
-    notes: lic.notes,
-    expires_at: lic.expiresAt,
-    created_at: lic.createdAt,
+    success: true,
+    user: {
+      username: lic.username,
+      license_key: lic.key,
+      hwid: lic.hwid,
+      status: lic.status,
+      rank: lic.rank,
+      notes: lic.notes,
+      expires_at: lic.expiresAt,
+      created_at: lic.createdAt,
+    }
   });
 });
 
-app.delete('/api/delete-license', async (req, res) => {
+app.all(['/api/v1/license/delete', '/api/delete-license'], async (req, res) => {
   const headerApiKey = (req.headers['api-key'] as string) || (req.headers['x-api-key'] as string);
   const headerSecretId = (req.headers['secret-id'] as string) || (req.headers['x-secret-id'] as string);
+  const headerService = (req.headers['service'] as string) || (req.headers['x-service'] as string) || (req.headers['service-name'] as string);
+
   const apiKey = headerApiKey || req.body?.api_key || (req.query?.api_key as string);
   const secretId = headerSecretId || req.body?.secret_id || (req.query?.secret_id as string);
+  const serviceParam = headerService || req.body?.service || req.body?.service_name || (req.query?.service as string);
   const targetKey = req.body?.license_key || req.body?.key || (req.query?.license_key as string) || (req.query?.key as string);
 
-  const srv = services.find((s) => (apiKey && s.apiKey === apiKey) || (secretId && s.secretId === secretId));
+  if (!apiKey || !secretId || !serviceParam) {
+    return res.status(401).json({
+      success: false,
+      detail: "Acceso denegado: Se requieren 'api_key', 'secret_id' y 'service' para eliminar licencias."
+    });
+  }
+
+  const srv = services.find((s) => 
+    s.apiKey === apiKey && 
+    s.secretId === secretId && 
+    (s.name.toLowerCase() === serviceParam.trim().toLowerCase() || s.id === serviceParam.trim())
+  );
+
   if (!srv) {
-    return res.status(401).json({ detail: 'Invalid API key' });
+    return res.status(401).json({ detail: 'Credenciales o servicio incorrectos' });
   }
 
   const index = licenses.findIndex((l) => l.serviceId === srv.id && l.key === targetKey);
@@ -1377,7 +1441,7 @@ app.delete('/api/delete-license', async (req, res) => {
   const tableName = insforge.getTableNameForService(srv.name);
   await insforge.deleteRecordByKey(tableName, targetKey);
 
-  return res.json({ ok: true });
+  return res.json({ success: true, message: "Licencia eliminada exitosamente" });
 });
 
 // START VITE / SERVER
