@@ -3,7 +3,7 @@ import path from 'path';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { createServer as createViteServer } from 'vite';
-import * as insforge from './insforge';
+import * as insforge from './insforge.js';
 
 const app = express();
 const PORT = 3000;
