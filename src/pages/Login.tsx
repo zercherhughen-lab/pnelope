@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 import { formatErr } from '../lib/api';
 import { VapeLogo } from '../components/VapeLogo';
-import { Shield, Sparkles, Lock, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -43,25 +43,21 @@ export const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0b0b0a] text-zinc-100 flex flex-col justify-center items-center p-6 font-sans relative overflow-hidden">
-      {/* Background Cyber Grid effect */}
+      {/* Background Cyber Grid */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f1f1e15_1px,transparent_1px),linear-gradient(to_bottom,#1f1f1e15_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
 
       <div className="w-full max-w-md space-y-6 relative z-10">
-        {/* Brand Header */}
-        <div className="text-center space-y-3 flex flex-col items-center">
-          <VapeLogo height={38} />
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-white/5 border border-white/10 text-zinc-300">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>SISTEMA DE AUTENTICACIÓN VAUTH 2.0</span>
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Iniciar Sesión</h1>
+        {/* Brand Header without v2 badge or extra pills */}
+        <div className="text-center space-y-2 flex flex-col items-center">
+          <VapeLogo height={36} />
+          <h1 className="text-2xl font-bold tracking-tight text-white pt-2">Iniciar Sesión</h1>
           <p className="text-xs text-zinc-400 max-w-xs">
-            Ingresa a tu panel de control para administrar servicios, generar licencias y vincular bots.
+            Ingresa a tu panel de control para administrar servicios y licencias.
           </p>
         </div>
 
-        {/* Login Container in Black, White, and Gray */}
-        <div className="p-6 rounded-2xl border border-white/10 bg-[#111110]/90 backdrop-blur-xl shadow-2xl space-y-5">
+        {/* Clean Login Box in Black, White, and Gray */}
+        <div className="p-6 rounded-2xl border border-white/10 bg-[#111110]/95 backdrop-blur-xl shadow-2xl space-y-5">
           {/* Google 1-Click Login Button */}
           <button
             type="button"
@@ -93,7 +89,7 @@ export const Login: React.FC = () => {
 
           <div className="flex items-center gap-3">
             <div className="h-px bg-white/10 flex-1" />
-            <span className="text-[11px] text-zinc-500 uppercase tracking-widest font-mono">O con tu cuenta</span>
+            <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-mono">O con tu cuenta</span>
             <div className="h-px bg-white/10 flex-1" />
           </div>
 
@@ -119,7 +115,7 @@ export const Login: React.FC = () => {
                   onClick={handleGoogleLogin}
                   className="text-[11px] text-zinc-400 hover:text-white transition-colors"
                 >
-                  Acceso Demo Rápido
+                  Acceso Rápido
                 </button>
               </div>
               <input
@@ -150,24 +146,6 @@ export const Login: React.FC = () => {
               Crear una cuenta
             </Link>
           </div>
-        </div>
-
-        {/* Feature Highlights Pills */}
-        <div className="flex items-center justify-center gap-4 text-[11px] text-zinc-500">
-          <span className="flex items-center gap-1">
-            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-            Hardware Lock (HWID)
-          </span>
-          <span>•</span>
-          <span className="flex items-center gap-1">
-            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-            Bot de Discord
-          </span>
-          <span>•</span>
-          <span className="flex items-center gap-1">
-            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-            API &lt;35ms
-          </span>
         </div>
       </div>
     </div>

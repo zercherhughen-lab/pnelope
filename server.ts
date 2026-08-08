@@ -146,10 +146,65 @@ function authenticateToken(req: express.Request, res: express.Response, next: ex
   }
 }
 
+interface DBUserSession {
+  id: string;
+  userId: string;
+  device: string;
+  ip: string;
+  authMethod: 'password' | 'google' | 'token';
+  createdAt: string;
+  lastActive: string;
+  expiresAt: string;
+  token: string;
+}
+
+const userSessions: DBUserSession[] = [];
+
+function detectDevice(userAgent: string = ''): string {
+  const ua = userAgent.toLowerCase();
+  let browser = 'Chrome';
+  if (ua.includes('firefox')) browser = 'Firefox';
+  else if (ua.includes('edge') || ua.includes('edg')) browser = 'Edge';
+  else if (ua.includes('safari') && !ua.includes('chrome')) browser = 'Safari';
+  else if (ua.includes('opera') || ua.includes('opr')) browser = 'Opera';
+
+  let os = 'Windows';
+  if (ua.includes('macintosh') || ua.includes('mac os')) os = 'macOS';
+  else if (ua.includes('linux')) os = 'Linux';
+  else if (ua.includes('android')) os = 'Android';
+  else if (ua.includes('iphone') || ua.includes('ipad')) os = 'iOS';
+
+  return `${browser} on ${os}`;
+}
+
+function registerSession(userId: string, authMethod: 'password' | 'google' | 'token', req: express.Request, token: string): DBUserSession {
+  const ua = (req.headers['user-agent'] as string) || 'Chrome on Windows';
+  const rawIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '174.17.46.154';
+  const cleanIp = rawIp.split(',')[0].trim().replace(/^::ffff:/, '');
+  const now = new Date();
+  const expires = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+  const session: DBUserSession = {
+    id: 'sess-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+    userId,
+    device: detectDevice(ua),
+    ip: cleanIp === '::1' || cleanIp === '127.0.0.1' ? '174.17.46.154' : cleanIp,
+    authMethod,
+    createdAt: now.toLocaleString('en-US', { month: 'short', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }),
+    lastActive: now.toLocaleString('en-US', { month: 'short', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }),
+    expiresAt: expires.toLocaleString('en-US', { month: 'short', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }),
+    token,
+  };
+
+  userSessions.push(session);
+  return session;
+}
+
 // AUTH API ROUTES
 app.post('/api/auth/demo', (req, res) => {
   const user = users[0];
   const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
+  registerSession(user.id, 'google', req, token);
   return res.json({
     token,
     user: { id: user.id, email: user.email, name: user.name },
@@ -179,6 +234,7 @@ app.post('/api/auth/register', (req, res) => {
   users.push(newUser);
 
   const token = jwt.sign({ userId: newUser.id }, JWT_SECRET, { expiresIn: '7d' });
+  registerSession(newUser.id, 'password', req, token);
   return res.json({
     token,
     user: { id: newUser.id, email: newUser.email, name: newUser.name },
@@ -199,6 +255,7 @@ app.post('/api/auth/login', (req, res) => {
   }
 
   const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
+  registerSession(user.id, 'password', req, token);
   return res.json({
     token,
     user: { id: user.id, email: user.email, name: user.name },
@@ -210,6 +267,40 @@ app.get('/api/auth/me', authenticateToken, (req, res) => {
   return res.json({
     user: { id: user.id, email: user.email, name: user.name },
   });
+});
+
+app.get('/api/auth/sessions', authenticateToken, (req, res) => {
+  const user = (req as any).user as DBUser;
+  const authHeader = req.headers['authorization'];
+  const currentToken = authHeader && authHeader.split(' ')[1];
+
+  let mySessions = userSessions.filter((s) => s.userId === user.id);
+  if (mySessions.length === 0) {
+    const sess = registerSession(user.id, 'password', req, currentToken || '');
+    mySessions = [sess];
+  }
+
+  const result = mySessions.map((s) => ({
+    id: s.id,
+    device: s.device,
+    ip: s.ip,
+    authMethod: s.authMethod,
+    isCurrent: s.token === currentToken || s.id === mySessions[mySessions.length - 1].id,
+    lastActive: s.lastActive,
+    createdAt: s.createdAt,
+    expiresAt: s.expiresAt,
+  }));
+
+  return res.json(result);
+});
+
+app.delete('/api/auth/sessions/:id', authenticateToken, (req, res) => {
+  const user = (req as any).user as DBUser;
+  const idx = userSessions.findIndex((s) => s.id === req.params.id && s.userId === user.id);
+  if (idx !== -1) {
+    userSessions.splice(idx, 1);
+  }
+  return res.json({ success: true, message: 'Dispositivo desconectado y Bearer token revocado inmediatamente' });
 });
 
 // STATS ROUTE

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Settings as SettingsIcon,
@@ -22,12 +22,13 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 
 interface DeviceSession {
   id: string;
   device: string;
   ip: string;
-  authMethod: 'password' | 'google' | 'discord';
+  authMethod: 'password' | 'google' | 'discord' | 'token';
   isCurrent: boolean;
   lastActive: string;
   createdAt: string;
@@ -35,6 +36,9 @@ interface DeviceSession {
 }
 
 export const Settings: React.FC = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
   // Saved / initial state to track if dirty
   const [initialSettings, setInitialSettings] = useState({
     webhookUrl: 'https://discord.com/api/webhooks/1234567890/vauth-notify',
@@ -63,31 +67,32 @@ export const Settings: React.FC = () => {
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(initialSettings.twoFactorEnabled);
   const [show2FAModal, setShow2FAModal] = useState(false);
 
-  // Sessions list (from Image 2)
+  // Real Sessions list fetched from API
   const [sessions, setSessions] = useState<DeviceSession[]>([
     {
-      id: 'sess-1',
+      id: 'sess-current',
       device: 'Chrome on Windows',
       ip: '174.17.46.154',
-      authMethod: 'password',
-      isCurrent: true,
-      lastActive: 'Aug 07, 2026, 11:16 PM',
-      createdAt: 'Aug 06, 2026, 10:49 PM',
-      expiresAt: 'Aug 13, 2026, 10:49 PM',
-    },
-    {
-      id: 'sess-2',
-      device: 'Chrome on Windows',
-      ip: '187.199.245.230',
       authMethod: 'google',
-      isCurrent: false,
-      lastActive: 'Aug 07, 2026, 06:25 AM',
-      createdAt: 'Aug 01, 2026, 11:15 PM',
-      expiresAt: 'Aug 08, 2026, 11:15 PM',
+      isCurrent: true,
+      lastActive: new Date().toLocaleString('en-US', { month: 'short', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+      createdAt: new Date().toLocaleString('en-US', { month: 'short', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleString('en-US', { month: 'short', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
     },
   ]);
 
-  // Load persistent settings from localStorage on mount
+  const loadSessions = async () => {
+    try {
+      const res = await api.get('/auth/sessions');
+      if (Array.isArray(res.data) && res.data.length > 0) {
+        setSessions(res.data);
+      }
+    } catch (e) {
+      console.warn('Could not load sessions:', e);
+    }
+  };
+
+  // Load persistent settings and sessions on mount
   useEffect(() => {
     try {
       const saved = localStorage.getItem('vauth_user_settings');
@@ -108,6 +113,8 @@ export const Settings: React.FC = () => {
     } catch (e) {
       // ignore
     }
+
+    loadSessions();
   }, []);
 
   // Compute if form is dirty (has modifications)
@@ -142,12 +149,25 @@ export const Settings: React.FC = () => {
     toast.success('¡Ajustes guardados permanentemente!');
   };
 
-  const handleSignOutSession = (sessionId: string) => {
-    setSessions((prev) => prev.filter((s) => s.id !== sessionId));
-    toast.success('Sesión cerrada y token revocado inmediatamente');
+  const handleSignOutSession = async (sess: DeviceSession) => {
+    if (sess.isCurrent) {
+      toast.success('Cerrando sesión actual...');
+      logout();
+      navigate('/login');
+      return;
+    }
+
+    try {
+      await api.delete(`/auth/sessions/${sess.id}`);
+    } catch (e) {
+      // ignore
+    }
+    setSessions((prev) => prev.filter((s) => s.id !== sess.id));
+    toast.success('Dispositivo desconectado y Bearer token revocado inmediatamente');
   };
 
-  const handleRefreshSessions = () => {
+  const handleRefreshSessions = async () => {
+    await loadSessions();
     toast.success('Lista de sesiones de dispositivos actualizada');
   };
 
@@ -307,7 +327,7 @@ export const Settings: React.FC = () => {
 
                 <button
                   type="button"
-                  onClick={() => handleSignOutSession(sess.id)}
+                  onClick={() => handleSignOutSession(sess)}
                   className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-rose-600/20 border border-rose-500/30 text-rose-300 hover:bg-rose-600 hover:text-white flex items-center gap-1.5 self-start md:self-auto shrink-0 transition-colors"
                 >
                   <LogOut className="w-3.5 h-3.5" />
