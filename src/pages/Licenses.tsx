@@ -24,6 +24,9 @@ import {
   Unlink,
   Sparkles,
   Calendar,
+  LayoutGrid,
+  Timer,
+  FileDown,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -559,8 +562,8 @@ export const Licenses: React.FC = () => {
         </form>
       )}
 
-      {/* Filter and Search Toolbar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl border border-white/10 bg-[#111110]">
+      {/* Filter, Actions & 6-Icon Toolbar (Exact Image 1 Replica) */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 rounded-xl border border-white/10 bg-[#111110]">
         <div className="flex-1 relative">
           <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
@@ -573,8 +576,73 @@ export const Licenses: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
+          {/* 6 Icons Action Toolbar from Image 1 */}
+          <div className="flex items-center gap-2 p-1 rounded-xl bg-zinc-950 border border-white/10">
+            {/* 1. Filter (Navy blue border) */}
+            <button
+              type="button"
+              onClick={() => setStatusFilter(statusFilter === 'all' ? 'active' : 'all')}
+              title="Filtrar claves"
+              className="flex size-[36px] items-center justify-center rounded-[8px] border border-[#1e3a8a] bg-[#0c1e3e] text-blue-300 hover:brightness-125 transition-all active:scale-95"
+            >
+              <Filter className="w-4 h-4" />
+            </button>
+
+            {/* 2. Grid / 4 Squares (White border active) */}
+            <button
+              type="button"
+              onClick={() => {
+                setStatusFilter('all');
+                setSearch('');
+              }}
+              title="Ver todas las claves (Grid)"
+              className="flex size-[36px] items-center justify-center rounded-[8px] border border-white bg-[#1a1a19] text-white hover:brightness-125 transition-all active:scale-95"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+
+            {/* 3. Key (Green border) */}
+            <button
+              type="button"
+              onClick={() => setStatusFilter('active')}
+              title="Solo claves activas"
+              className="flex size-[36px] items-center justify-center rounded-[8px] border border-[#064e3b] bg-[#022c22] text-emerald-400 hover:brightness-125 transition-all active:scale-95"
+            >
+              <Key className="w-4 h-4" />
+            </button>
+
+            {/* 4. Timer (Blue border) */}
+            <button
+              type="button"
+              onClick={() => setStatusFilter('expired')}
+              title="Claves expiradas"
+              className="flex size-[36px] items-center justify-center rounded-[8px] border border-[#1e3a8a] bg-[#0c1e3e] text-blue-400 hover:brightness-125 transition-all active:scale-95"
+            >
+              <Timer className="w-4 h-4" />
+            </button>
+
+            {/* 5. Document Download (Purple border) */}
+            <button
+              type="button"
+              onClick={exportToCSV}
+              title="Exportar archivo CSV"
+              className="flex size-[36px] items-center justify-center rounded-[8px] border border-[#4c1d95] bg-[#2e1065] text-purple-300 hover:brightness-125 transition-all active:scale-95"
+            >
+              <FileDown className="w-4 h-4" />
+            </button>
+
+            {/* 6. Trash (Red border) */}
+            <button
+              type="button"
+              onClick={() => setStatusFilter('banned')}
+              title="Claves baneadas / Eliminadas"
+              className="flex size-[36px] items-center justify-center rounded-[8px] border border-[#7f1d1d] bg-[#450a0a] text-red-400 hover:brightness-125 transition-all active:scale-95"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+
           <div className="flex items-center gap-1.5 text-xs text-zinc-400">
-            <Filter className="w-3.5 h-3.5" />
             <span>Servicio:</span>
             <select
               value={selectedServiceId}
@@ -588,20 +656,6 @@ export const Licenses: React.FC = () => {
                 </option>
               ))}
             </select>
-          </div>
-
-          <div className="flex items-center gap-1 bg-zinc-950 border border-white/10 p-1 rounded-lg text-xs">
-            {(['all', 'active', 'paused', 'banned', 'expired'] as const).map((st) => (
-              <button
-                key={st}
-                onClick={() => setStatusFilter(st)}
-                className={`px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
-                  statusFilter === st ? 'bg-white/10 text-white font-bold' : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                {st === 'all' ? 'Todas' : st === 'active' ? 'Activas' : st === 'paused' ? 'Pausadas' : st === 'banned' ? 'Baneadas' : 'Expiradas'}
-              </button>
-            ))}
           </div>
         </div>
       </div>

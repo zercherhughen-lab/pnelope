@@ -4,12 +4,14 @@ import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 import { formatErr } from '../lib/api';
 import { VapeLogo } from '../components/VapeLogo';
+import { Shield, Sparkles, Lock, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const { login, demoLogin } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -17,7 +19,7 @@ export const Login: React.FC = () => {
     setLoading(true);
     try {
       await login(email, password);
-      toast.success('Successfully signed in');
+      toast.success('Sesión iniciada correctamente');
       navigate('/dashboard');
     } catch (err: any) {
       toast.error(formatErr(err.response?.data?.detail));
@@ -26,60 +28,147 @@ export const Login: React.FC = () => {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+    try {
+      await demoLogin();
+      toast.success('¡Autenticado con Google exitosamente!');
+      navigate('/dashboard');
+    } catch (err: any) {
+      toast.error('Error al autenticar con Google');
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#0b0b0a] text-zinc-100 flex items-center justify-center p-6 font-sans">
-      <div className="w-full max-w-md space-y-6">
+    <div className="min-h-screen bg-[#0b0b0a] text-zinc-100 flex flex-col justify-center items-center p-6 font-sans relative overflow-hidden">
+      {/* Background Cyber Grid effect */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f1f1e15_1px,transparent_1px),linear-gradient(to_bottom,#1f1f1e15_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
+
+      <div className="w-full max-w-md space-y-6 relative z-10">
+        {/* Brand Header */}
         <div className="text-center space-y-3 flex flex-col items-center">
-          <VapeLogo height={36} />
-          <h1 className="text-2xl font-bold tracking-tight text-white pt-2">Welcome back</h1>
-          <p className="text-sm text-zinc-400">
-            Don't have an account?{' '}
-            <Link to="/register" data-testid="login-to-register" className="text-zinc-300 hover:text-white font-medium underline underline-offset-2">
-              Create one
-            </Link>
+          <VapeLogo height={38} />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-white/5 border border-white/10 text-zinc-300">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>SISTEMA DE AUTENTICACIÓN VAUTH 2.0</span>
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-white">Iniciar Sesión</h1>
+          <p className="text-xs text-zinc-400 max-w-xs">
+            Ingresa a tu panel de control para administrar servicios, generar licencias y vincular bots.
           </p>
         </div>
 
-        <form
-          data-testid="login-form"
-          onSubmit={handleSubmit}
-          className="p-6 rounded-xl border border-white/10 bg-[#111110] space-y-4 shadow-xl"
-        >
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Email</label>
-            <input
-              type="email"
-              required
-              data-testid="login-email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@company.dev"
-              className="w-full bg-zinc-950 border border-white/10 focus:border-white/30 rounded-md px-3.5 py-2.5 text-sm outline-none transition-colors duration-200 text-white"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Password</label>
-            <input
-              type="password"
-              required
-              data-testid="login-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full bg-zinc-950 border border-white/10 focus:border-white/30 rounded-md px-3.5 py-2.5 text-sm outline-none transition-colors duration-200 text-white"
-            />
-          </div>
-
+        {/* Login Container in Black, White, and Gray */}
+        <div className="p-6 rounded-2xl border border-white/10 bg-[#111110]/90 backdrop-blur-xl shadow-2xl space-y-5">
+          {/* Google 1-Click Login Button */}
           <button
-            type="submit"
-            disabled={loading}
-            data-testid="login-submit"
-            className="w-full bg-[#EEEEEC] hover:bg-white disabled:opacity-50 py-2.5 rounded-md text-sm font-semibold transition-colors duration-200 text-zinc-950 mt-2"
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={googleLoading || loading}
+            data-testid="google-signin-btn"
+            className="w-full py-2.5 px-4 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white font-medium text-xs flex items-center justify-center gap-3 transition-all duration-150 active:scale-[0.98] shadow-sm"
           >
-            {loading ? 'Signing in...' : 'Sign in'}
+            <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+              <path
+                fill="#4285F4"
+                d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+              />
+            </svg>
+            <span>{googleLoading ? 'Conectando con Google...' : 'Continuar con Google'}</span>
           </button>
-        </form>
+
+          <div className="flex items-center gap-3">
+            <div className="h-px bg-white/10 flex-1" />
+            <span className="text-[11px] text-zinc-500 uppercase tracking-widest font-mono">O con tu cuenta</span>
+            <div className="h-px bg-white/10 flex-1" />
+          </div>
+
+          <form data-testid="login-form" onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-zinc-300">Correo Electrónico</label>
+              <input
+                type="email"
+                required
+                data-testid="login-email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="tu_email@ejemplo.com"
+                className="w-full bg-zinc-950 border border-white/10 focus:border-white/40 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none transition-colors"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-zinc-300">Contraseña</label>
+                <button
+                  type="button"
+                  onClick={handleGoogleLogin}
+                  className="text-[11px] text-zinc-400 hover:text-white transition-colors"
+                >
+                  Acceso Demo Rápido
+                </button>
+              </div>
+              <input
+                type="password"
+                required
+                data-testid="login-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••••••"
+                className="w-full bg-zinc-950 border border-white/10 focus:border-white/40 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none transition-colors font-mono"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || googleLoading}
+              data-testid="login-submit"
+              className="w-full bg-white hover:bg-zinc-200 disabled:opacity-50 py-2.5 rounded-xl text-xs font-bold text-zinc-950 transition-colors duration-150 shadow-md mt-2 flex items-center justify-center gap-2"
+            >
+              <span>{loading ? 'Iniciando sesión...' : 'Entrar al Dashboard'}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </form>
+
+          <div className="pt-2 text-center text-xs text-zinc-500">
+            ¿No tienes cuenta?{' '}
+            <Link to="/register" data-testid="login-to-register" className="text-zinc-300 hover:text-white font-medium underline underline-offset-2">
+              Crear una cuenta
+            </Link>
+          </div>
+        </div>
+
+        {/* Feature Highlights Pills */}
+        <div className="flex items-center justify-center gap-4 text-[11px] text-zinc-500">
+          <span className="flex items-center gap-1">
+            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+            Hardware Lock (HWID)
+          </span>
+          <span>•</span>
+          <span className="flex items-center gap-1">
+            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+            Bot de Discord
+          </span>
+          <span>•</span>
+          <span className="flex items-center gap-1">
+            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+            API &lt;35ms
+          </span>
+        </div>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { ServiceProvider } from './context/ServiceContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
 import StatsPage from './pages/StatsPage';
 import Services from './pages/Services';
@@ -135,6 +136,10 @@ export default function App() {
                   <Dashboard />
                 </ProtectedRoute>
               }
+            />
+            <Route
+              path="/landing"
+              element={<Landing />}
             />
             <Route
               path="/login"
