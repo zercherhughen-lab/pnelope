@@ -19,7 +19,7 @@ export const Login: React.FC = () => {
     setLoading(true);
     try {
       await login(email, password);
-      toast.success('Sesión iniciada correctamente');
+      toast.success('Successfully signed in');
       navigate('/dashboard');
     } catch (err: any) {
       toast.error(formatErr(err.response?.data?.detail));
@@ -32,10 +32,10 @@ export const Login: React.FC = () => {
     setGoogleLoading(true);
     try {
       await demoLogin();
-      toast.success('¡Autenticado con Google exitosamente!');
+      toast.success('Successfully authenticated with Google!');
       navigate('/dashboard');
     } catch (err: any) {
-      toast.error('Error al autenticar con Google');
+      toast.error('Failed to authenticate with Google');
     } finally {
       setGoogleLoading(false);
     }
@@ -47,12 +47,12 @@ export const Login: React.FC = () => {
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f1f1e15_1px,transparent_1px),linear-gradient(to_bottom,#1f1f1e15_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
 
       <div className="w-full max-w-md space-y-6 relative z-10">
-        {/* Brand Header without v2 badge or extra pills */}
+        {/* Brand Header */}
         <div className="text-center space-y-2 flex flex-col items-center">
           <VapeLogo height={36} />
-          <h1 className="text-2xl font-bold tracking-tight text-white pt-2">Iniciar Sesión</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-white pt-2">Sign in to your account</h1>
           <p className="text-xs text-zinc-400 max-w-xs">
-            Ingresa a tu panel de control para administrar servicios y licencias.
+            Access your developer portal to manage services, issue keys, and configure bots.
           </p>
         </div>
 
@@ -84,38 +84,38 @@ export const Login: React.FC = () => {
                 d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
               />
             </svg>
-            <span>{googleLoading ? 'Conectando con Google...' : 'Continuar con Google'}</span>
+            <span>{googleLoading ? 'Connecting with Google...' : 'Continue with Google'}</span>
           </button>
 
           <div className="flex items-center gap-3">
             <div className="h-px bg-white/10 flex-1" />
-            <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-mono">O con tu cuenta</span>
+            <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-mono">Or with email</span>
             <div className="h-px bg-white/10 flex-1" />
           </div>
 
           <form data-testid="login-form" onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-300">Correo Electrónico</label>
+              <label className="text-xs font-semibold text-zinc-300">Email Address</label>
               <input
                 type="email"
                 required
                 data-testid="login-email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="tu_email@ejemplo.com"
+                placeholder="developer@company.dev"
                 className="w-full bg-zinc-950 border border-white/10 focus:border-white/40 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none transition-colors"
               />
             </div>
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-zinc-300">Contraseña</label>
+                <label className="text-xs font-semibold text-zinc-300">Password</label>
                 <button
                   type="button"
                   onClick={handleGoogleLogin}
                   className="text-[11px] text-zinc-400 hover:text-white transition-colors"
                 >
-                  Acceso Rápido
+                  Quick Demo Access
                 </button>
               </div>
               <input
@@ -135,15 +135,15 @@ export const Login: React.FC = () => {
               data-testid="login-submit"
               className="w-full bg-white hover:bg-zinc-200 disabled:opacity-50 py-2.5 rounded-xl text-xs font-bold text-zinc-950 transition-colors duration-150 shadow-md mt-2 flex items-center justify-center gap-2"
             >
-              <span>{loading ? 'Iniciando sesión...' : 'Entrar al Dashboard'}</span>
+              <span>{loading ? 'Signing in...' : 'Sign In to Dashboard'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </form>
 
           <div className="pt-2 text-center text-xs text-zinc-500">
-            ¿No tienes cuenta?{' '}
+            Don't have an account?{' '}
             <Link to="/register" data-testid="login-to-register" className="text-zinc-300 hover:text-white font-medium underline underline-offset-2">
-              Crear una cuenta
+              Create developer account
             </Link>
           </div>
         </div>

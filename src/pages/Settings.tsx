@@ -44,7 +44,7 @@ export const Settings: React.FC = () => {
     webhookUrl: 'https://discord.com/api/webhooks/1234567890/vauth-notify',
     discordBotToken: '',
     discordGuildId: '',
-    discordRoleName: 'Cliente',
+    discordRoleName: 'Client',
     notifyOnRedeem: true,
     notifyOnHwidReset: true,
     notifyOnLogin: false,
@@ -102,7 +102,7 @@ export const Settings: React.FC = () => {
         setWebhookUrl(parsed.webhookUrl ?? initialSettings.webhookUrl);
         setDiscordBotToken(parsed.discordBotToken ?? '');
         setDiscordGuildId(parsed.discordGuildId ?? '');
-        setDiscordRoleName(parsed.discordRoleName ?? 'Cliente');
+        setDiscordRoleName(parsed.discordRoleName ?? 'Client');
         setNotifyOnRedeem(parsed.notifyOnRedeem ?? true);
         setNotifyOnHwidReset(parsed.notifyOnHwidReset ?? true);
         setNotifyOnLogin(parsed.notifyOnLogin ?? false);
@@ -146,12 +146,12 @@ export const Settings: React.FC = () => {
     };
     setInitialSettings(newSettings);
     localStorage.setItem('vauth_user_settings', JSON.stringify(newSettings));
-    toast.success('¡Ajustes guardados permanentemente!');
+    toast.success('Settings permanently saved!');
   };
 
   const handleSignOutSession = async (sess: DeviceSession) => {
     if (sess.isCurrent) {
-      toast.success('Cerrando sesión actual...');
+      toast.success('Signing out current session...');
       logout();
       navigate('/login');
       return;
@@ -163,12 +163,12 @@ export const Settings: React.FC = () => {
       // ignore
     }
     setSessions((prev) => prev.filter((s) => s.id !== sess.id));
-    toast.success('Dispositivo desconectado y Bearer token revocado inmediatamente');
+    toast.success('Device disconnected and Bearer token revoked immediately');
   };
 
   const handleRefreshSessions = async () => {
     await loadSessions();
-    toast.success('Lista de sesiones de dispositivos actualizada');
+    toast.success('Active devices session list updated');
   };
 
   return (
@@ -183,13 +183,13 @@ export const Settings: React.FC = () => {
       <div className="pb-6 border-b border-white/10 space-y-2">
         <div className="flex items-center gap-2 text-xs text-white font-semibold uppercase tracking-wider">
           <SettingsIcon className="w-4 h-4 text-white" />
-          Ajustes del Sistema
+          System Settings
         </div>
         <h1 className="text-[24px] font-medium sm:text-[38px] sm:font-semibold text-[#EEEEEC] tracking-tight">
-          Configuración y Seguridad
+          Security & Preferences
         </h1>
         <p className="text-[15px] sm:text-[16px] text-[#B5B3AD]">
-          Administra autenticación de dos factores, dispositivos con sesión iniciada, cuentas vinculadas y webhooks de Discord.
+          Manage two-factor authentication, active device sessions, connected accounts, and Discord webhooks.
         </p>
       </div>
 
@@ -201,16 +201,16 @@ export const Settings: React.FC = () => {
               <Globe className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-white">Discord Webhooks & Notificaciones en Vivo</h2>
+              <h2 className="text-base font-semibold text-white">Discord Webhooks & Live Alerts</h2>
               <p className="text-xs text-zinc-400">
-                Guarda tu webhook para recibir alertas en tiempo real de canjes de licencias y auto-resets de HWID.
+                Configure your persistent webhook to receive real-time alerts on license claims and HWID resets.
               </p>
             </div>
           </div>
 
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-300">URL del Webhook de Discord (Persistente)</label>
+              <label className="text-xs font-semibold text-zinc-300">Discord Webhook URL (Persistent)</label>
               <input
                 type="url"
                 value={webhookUrl}
@@ -228,7 +228,7 @@ export const Settings: React.FC = () => {
                   onChange={(e) => setNotifyOnRedeem(e.target.checked)}
                   className="w-4 h-4 accent-white rounded cursor-pointer"
                 />
-                <span className="text-xs text-zinc-200 font-medium">Notificar al canjear clave nueva (/claim)</span>
+                <span className="text-xs text-zinc-200 font-medium">Notify on key claim (/claim)</span>
               </label>
 
               <label className="flex items-center gap-2.5 p-3 rounded-lg bg-zinc-950/70 border border-white/10 cursor-pointer hover:border-white/20 transition-colors">
@@ -238,7 +238,7 @@ export const Settings: React.FC = () => {
                   onChange={(e) => setNotifyOnHwidReset(e.target.checked)}
                   className="w-4 h-4 accent-white rounded cursor-pointer"
                 />
-                <span className="text-xs text-zinc-200 font-medium">Notificar al desvincular HWID (/resethwid)</span>
+                <span className="text-xs text-zinc-200 font-medium">Notify on HWID unbind (/resethwid)</span>
               </label>
             </div>
           </div>
@@ -260,7 +260,7 @@ export const Settings: React.FC = () => {
               onClick={() => {
                 const nextState = !twoFactorEnabled;
                 setTwoFactorEnabled(nextState);
-                toast.success(nextState ? '2FA activado correctamente' : '2FA desactivado');
+                toast.success(nextState ? '2FA successfully enabled' : '2FA disabled');
               }}
               className="px-4 py-2 rounded-lg text-xs font-semibold bg-white text-zinc-950 hover:bg-zinc-200 transition-colors duration-150 self-start sm:self-auto"
             >
@@ -379,7 +379,7 @@ export const Settings: React.FC = () => {
                 onClick={() => {
                   const next = !googleLinked;
                   setGoogleLinked(next);
-                  toast.success(next ? 'Cuenta de Google vinculada' : 'Cuenta de Google desvinculada');
+                  toast.success(next ? 'Google account linked' : 'Google account unlinked');
                 }}
                 className={`px-4 py-2 rounded-lg text-xs font-semibold transition-colors ${
                   googleLinked
@@ -412,7 +412,7 @@ export const Settings: React.FC = () => {
                 onClick={() => {
                   const next = !discordLinked;
                   setDiscordLinked(next);
-                  toast.success(next ? 'Cuenta de Discord vinculada' : 'Cuenta de Discord desvinculada');
+                  toast.success(next ? 'Discord account linked' : 'Discord account unlinked');
                 }}
                 className="px-4 py-2 rounded-lg text-xs font-semibold border border-white/10 bg-zinc-900 hover:bg-zinc-800 text-white flex items-center gap-1.5 transition-colors"
               >
@@ -437,7 +437,7 @@ export const Settings: React.FC = () => {
             >
               <div className="flex items-center gap-2 text-xs text-white">
                 <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                <span className="font-semibold">Tienes cambios sin guardar en tus ajustes</span>
+                <span className="font-semibold">You have unsaved changes in your settings</span>
               </div>
 
               <div className="flex items-center gap-2">
@@ -457,14 +457,14 @@ export const Settings: React.FC = () => {
                   }}
                   className="px-4 py-2 text-xs font-medium text-zinc-400 hover:text-white transition-colors"
                 >
-                  Descartar
+                  Discard
                 </button>
                 <button
                   type="submit"
                   className="bg-white hover:bg-zinc-200 text-zinc-950 px-5 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-colors duration-150 shadow-md"
                 >
                   <Save className="w-3.5 h-3.5" />
-                  <span>Guardar y Aplicar Ajustes</span>
+                  <span>Save & Apply Settings</span>
                 </button>
               </div>
             </motion.div>

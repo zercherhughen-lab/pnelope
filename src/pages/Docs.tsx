@@ -11,6 +11,7 @@ const CodeBlock: React.FC<{ code: string; lang: string }> = ({ code, lang }) => 
   const handleCopy = () => {
     navigator.clipboard.writeText(code);
     setCopied(true);
+    toast.success('Code snippet copied to clipboard');
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -23,7 +24,7 @@ const CodeBlock: React.FC<{ code: string; lang: string }> = ({ code, lang }) => 
           className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors duration-200 flex items-center gap-1"
         >
           {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-          <span>{copied ? 'Copiado' : 'Copiar'}</span>
+          <span>{copied ? 'Copied' : 'Copy'}</span>
         </button>
       </div>
       <pre className="leading-relaxed whitespace-pre font-mono">{code}</pre>
@@ -70,9 +71,9 @@ export const Docs: React.FC = () => {
         service: testService,
       });
       setTestResult(res.data);
-      toast.success('Consulta ejecutada con éxito');
+      toast.success('Query executed successfully');
     } catch (err: any) {
-      setTestResult(err.response?.data || { error: 'Error al conectar con la API' });
+      setTestResult(err.response?.data || { error: 'Error connecting to API' });
       toast.error(formatErr(err.response?.data?.detail || err.message));
     } finally {
       setTesting(false);
@@ -92,7 +93,7 @@ class Program
         var client = new HttpClient();
         var url = "${origin}/api/v1/service/query";
 
-        // Se requieren los 3 parametros SI O SI
+        // All 3 parameters are strictly required
         var jsonPayload = "{\\"api_key\\": \\"8f2a91c4b7d3e05f6a8b9c0d1e2f3a4b\\", \\"secret_id\\": \\"sec_9a8b7c6d5e4f3a2b1c0d9e8f\\", \\"service\\": \\"Vape\\"}";
         var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
@@ -107,7 +108,7 @@ class Program
 
 url = "${origin}/api/v1/service/query"
 
-# Los 3 parametros son obligatorios para consultar los usuarios y licencias
+# All 3 parameters are required to query users, licenses and hardware locks
 payload = {
     "api_key": "8f2a91c4b7d3e05f6a8b9c0d1e2f3a4b",
     "secret_id": "sec_9a8b7c6d5e4f3a2b1c0d9e8f",
@@ -119,18 +120,18 @@ data = response.json()
 
 users = data.get("users", [])
 for user in users:
-    print(f"Usuario: {user['username']} | Key: {user['license_key']} | HWID: {user['hwid']} | Status: {user['status']} | Expira: {user['expires_at']}")`;
+    print(f"User: {user['username']} | Key: {user['license_key']} | HWID: {user['hwid']} | Status: {user['status']} | Expires: {user['expires_at']}")`;
 
   const nodeQueryExample = `const fetch = require('node-fetch');
 
-async function consultarServicio() {
+async function queryServiceData() {
   const res = await fetch('${origin}/api/v1/service/query', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       api_key: '8f2a91c4b7d3e05f6a8b9c0d1e2f3a4b',
       secret_id: 'sec_9a8b7c6d5e4f3a2b1c0d9e8f',
-      service: 'Vape' // Nombre exacto del servicio
+      service: 'Vape'
     })
   });
 
@@ -138,7 +139,7 @@ async function consultarServicio() {
   console.log(data);
 }
 
-consultarServicio();`;
+queryServiceData();`;
 
   const curlQueryExample = `curl -X POST "${origin}/api/v1/service/query" \\
   -H "Content-Type: application/json" \\
@@ -174,15 +175,15 @@ int main() {
 
 url = "${origin}/api/v1/license/create"
 
-# Los 3 parámetros de verificación obligatorios + datos de la nueva clave
+# 3 mandatory service credentials + new license options
 payload = {
     "api_key": "8f2a91c4b7d3e05f6a8b9c0d1e2f3a4b",
     "secret_id": "sec_9a8b7c6d5e4f3a2b1c0d9e8f",
-    "service": "Vape",              # Nombre o ID exacto del servicio
-    "username": "cliente_discord",  # Usuario o ID del comprador
+    "service": "Vape",              # Exact service name or ID
+    "username": "client_discord",   # Customer username or ID
     "duration": "30 Days",          # "30 Days", "Lifetime", "1 Year", "10 Seconds", etc.
-    "rank": "VIP",                  # Rango asignado (opcional)
-    "notes": "Compra automática vía Webhook / Bot"
+    "rank": "VIP",                  # Assigned role/tier
+    "notes": "Automated order via Webhook / Bot"
 }
 
 response = requests.post(url, json=payload)
@@ -190,14 +191,14 @@ data = response.json()
 
 if data.get("success"):
     user = data.get("user")
-    print(f"Licencia Creada: {user['license_key']}")
-    print(f"Usuario: {user['username']} | Expira: {user['expires_at']}")
+    print(f"License Key Created: {user['license_key']}")
+    print(f"User: {user['username']} | Expires: {user['expires_at']}")
 else:
     print("Error:", data.get("detail"))`;
 
   const nodeCreateExample = `const fetch = require('node-fetch');
 
-async function crearLicenciaExterna() {
+async function createExternalLicense() {
   const res = await fetch('${origin}/api/v1/license/create', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -205,7 +206,7 @@ async function crearLicenciaExterna() {
       api_key: '8f2a91c4b7d3e05f6a8b9c0d1e2f3a4b',
       secret_id: 'sec_9a8b7c6d5e4f3a2b1c0d9e8f',
       service: 'Vape',
-      username: 'comprador_auto',
+      username: 'buyer_auto',
       duration: '30 Days',
       rank: 'Default'
     })
@@ -215,7 +216,7 @@ async function crearLicenciaExterna() {
   console.log(data);
 }
 
-crearLicenciaExterna();`;
+createExternalLicense();`;
 
   const csharpCreateExample = `using System;
 using System.Net.Http;
@@ -233,7 +234,7 @@ class Program
             ""api_key"": ""8f2a91c4b7d3e05f6a8b9c0d1e2f3a4b"",
             ""secret_id"": ""sec_9a8b7c6d5e4f3a2b1c0d9e8f"",
             ""service"": ""Vape"",
-            ""username"": ""cliente_csharp"",
+            ""username"": ""client_csharp"",
             ""duration"": ""Lifetime"",
             ""rank"": ""VIP""
         }";
@@ -252,7 +253,7 @@ class Program
     "api_key": "8f2a91c4b7d3e05f6a8b9c0d1e2f3a4b",
     "secret_id": "sec_9a8b7c6d5e4f3a2b1c0d9e8f",
     "service": "Vape",
-    "username": "cliente_nuevo",
+    "username": "new_client",
     "duration": "30 Days",
     "rank": "Default"
   }'`;
@@ -282,10 +283,10 @@ class Program
           API v1 Documentation
         </div>
         <h1 className="text-[24px] font-medium sm:text-[38px] sm:font-semibold text-[#EEEEEC] tracking-tight">
-          Guía de Integración Externa Vape API
+          Vape API External Integration Guide
         </h1>
         <p className="text-[15px] sm:text-[16px] text-[#B5B3AD] mt-1">
-          Aprende a conectar programas externos, bots de Discord, loaders y software C#/C++/Python con la API de Vape.
+          Learn how to connect external programs, Discord bots, loaders, and C#/C++/Python clients to the Vape API.
         </p>
       </div>
 
@@ -293,30 +294,30 @@ class Program
       <div className="p-5 rounded-xl border border-amber-500/30 bg-amber-500/10 space-y-3 text-amber-200">
         <div className="flex items-center gap-2.5 text-amber-300 font-semibold text-base">
           <AlertTriangle className="w-5 h-5 shrink-0" />
-          <span>Requisito Indispensable: 3 Parámetros Obligatorios</span>
+          <span>Mandatory Requirement: 3 Verification Parameters</span>
         </div>
         <p className="text-xs leading-relaxed text-zinc-300">
-          Para realizar llamados a la API y obtener los datos de un servicio (sus usuarios, keys, HWID, status de baneado, caducidad y rango), el programa externo <strong className="text-white">DEBE proporcionar sí o sí los siguientes 3 valores</strong>:
+          To make API queries and retrieve service data (users, keys, HWID, ban status, expiration, and ranks), your external client <strong className="text-white">MUST provide all 3 values</strong>:
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
           <div className="bg-black/40 p-3 rounded-lg border border-white/10 space-y-1">
-            <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider">1. Servicio Creado</span>
+            <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider">1. Service Name</span>
             <p className="text-xs text-white font-mono font-medium">service: "Vape"</p>
-            <p className="text-[11px] text-zinc-400">Nombre exacto o ID del servicio.</p>
+            <p className="text-[11px] text-zinc-400">Exact name or ID of the registered service.</p>
           </div>
           <div className="bg-black/40 p-3 rounded-lg border border-white/10 space-y-1">
             <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider">2. API Key</span>
             <p className="text-xs text-white font-mono font-medium">api_key: "vk_live_..."</p>
-            <p className="text-[11px] text-zinc-400">Generado en el panel de servicios.</p>
+            <p className="text-[11px] text-zinc-400">Found in your service application panel.</p>
           </div>
           <div className="bg-black/40 p-3 rounded-lg border border-white/10 space-y-1">
             <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider">3. Secret ID</span>
             <p className="text-xs text-white font-mono font-medium">secret_id: "sec_..."</p>
-            <p className="text-[11px] text-zinc-400">Clave secreta única del servicio.</p>
+            <p className="text-[11px] text-zinc-400">Unique secret key for the service application.</p>
           </div>
         </div>
         <p className="text-[11px] text-zinc-400 italic">
-          * Si falta cualquiera de estos 3 valores o no coinciden, la API rechazará la llamada y responderá con acceso denegado.
+          * If any of these 3 parameters are missing or incorrect, the API will reject the request with HTTP 403 Forbidden.
         </p>
       </div>
 
@@ -325,16 +326,16 @@ class Program
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">POST</span>
-            <h2 className="text-xl font-semibold text-white">1. Consultar Licencias y Usuarios del Servicio</h2>
+            <h2 className="text-xl font-semibold text-white">1. Query Service Licenses and Users</h2>
           </div>
           <p className="text-sm text-zinc-400">
-            Envía los 3 valores al endpoint <code className="text-[#EEEEEC] bg-white/10 px-1.5 py-0.5 rounded text-xs font-mono">POST /api/v1/service/query</code> para recibir el estado completo de todas las licencias del servicio (keys, usuarios, HWID, status si está baneado o caducado, rango).
+            Send the 3 parameters to <code className="text-[#EEEEEC] bg-white/10 px-1.5 py-0.5 rounded text-xs font-mono">POST /api/v1/service/query</code> to fetch complete status for all service licenses.
           </p>
         </div>
 
         {/* Code Snippets Accordion Categories */}
         <div className="space-y-3">
-          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Categorías Desplegables por Lenguaje:</p>
+          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Expandable Code Examples by Language:</p>
           
           {/* C# */}
           <div className="border border-white/10 rounded-lg overflow-hidden bg-[#111110]">
@@ -345,7 +346,7 @@ class Program
             >
               <div className="flex items-center gap-2">
                 <Code className="w-4 h-4 text-indigo-400" />
-                <span className="text-xs font-semibold text-white">Ejemplo de Integración C# (.NET)</span>
+                <span className="text-xs font-semibold text-white">C# (.NET) Integration Example</span>
               </div>
               {expandedSnippets.csharp ? <ChevronDown className="w-4 h-4 text-zinc-400" /> : <ChevronRight className="w-4 h-4 text-zinc-400" />}
             </button>
@@ -365,7 +366,7 @@ class Program
             >
               <div className="flex items-center gap-2">
                 <Terminal className="w-4 h-4 text-amber-400" />
-                <span className="text-xs font-semibold text-white">Ejemplo de Integración Python (requests)</span>
+                <span className="text-xs font-semibold text-white">Python (requests) Integration Example</span>
               </div>
               {expandedSnippets.python ? <ChevronDown className="w-4 h-4 text-zinc-400" /> : <ChevronRight className="w-4 h-4 text-zinc-400" />}
             </button>
@@ -385,7 +386,7 @@ class Program
             >
               <div className="flex items-center gap-2">
                 <Code className="w-4 h-4 text-emerald-400" />
-                <span className="text-xs font-semibold text-white">Ejemplo de Integración C++ (libcurl / WinINet)</span>
+                <span className="text-xs font-semibold text-white">C++ (libcurl / WinINet) Integration Example</span>
               </div>
               {expandedSnippets.cpp ? <ChevronDown className="w-4 h-4 text-zinc-400" /> : <ChevronRight className="w-4 h-4 text-zinc-400" />}
             </button>
@@ -405,7 +406,7 @@ class Program
             >
               <div className="flex items-center gap-2">
                 <Code className="w-4 h-4 text-yellow-400" />
-                <span className="text-xs font-semibold text-white">Ejemplo de Integración Node.js / JavaScript</span>
+                <span className="text-xs font-semibold text-white">Node.js / JavaScript Integration Example</span>
               </div>
               {expandedSnippets.node ? <ChevronDown className="w-4 h-4 text-zinc-400" /> : <ChevronRight className="w-4 h-4 text-zinc-400" />}
             </button>
@@ -425,7 +426,7 @@ class Program
             >
               <div className="flex items-center gap-2">
                 <Terminal className="w-4 h-4 text-zinc-400" />
-                <span className="text-xs font-semibold text-white">Comando cURL para Pruebas Rápidas</span>
+                <span className="text-xs font-semibold text-white">cURL Command for Quick Testing</span>
               </div>
               {expandedSnippets.curl ? <ChevronDown className="w-4 h-4 text-zinc-400" /> : <ChevronRight className="w-4 h-4 text-zinc-400" />}
             </button>
@@ -441,9 +442,9 @@ class Program
       {/* Response Payload Structure */}
       <section className="space-y-4 pt-6 border-t border-white/10">
         <div className="space-y-1">
-          <h2 className="text-xl font-semibold text-white">Respuesta Esperada de la API (JSON)</h2>
+          <h2 className="text-xl font-semibold text-white">Expected API Response (JSON)</h2>
           <p className="text-sm text-zinc-400">
-            Al enviar los 3 parámetros correctos, la API devuelve directamente el listado de usuarios con sus licencias y estados:
+            Upon supplying valid credentials, the API responds with all assigned users, active licenses, and lock states:
           </p>
         </div>
         <CodeBlock
@@ -482,16 +483,16 @@ class Program
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">POST</span>
-            <h2 className="text-xl font-semibold text-white">2. Creación Externa de Licencias y Usuarios (/api/v1/license/create)</h2>
+            <h2 className="text-xl font-semibold text-white">2. External License & User Issuance (/api/v1/license/create)</h2>
           </div>
           <p className="text-sm text-zinc-400">
-            Permite que programas externos (Bots de Discord/Telegram, tiendas automáticas, webhooks o pasarelas de pago) creen usuarios y generen licencias automáticamente usando los 3 parámetros de verificación obligatorios.
+            Allows external software (Discord/Telegram bots, automated store webhooks, payment gateways) to generate licenses and assign user accounts dynamically.
           </p>
         </div>
 
         {/* Creation Snippets Accordion */}
         <div className="space-y-3">
-          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Ejemplos para Generar Licencias Externamente:</p>
+          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">External Issuance Snippets:</p>
 
           {/* Python Create */}
           <div className="border border-white/10 rounded-lg overflow-hidden bg-[#111110]">
@@ -502,7 +503,7 @@ class Program
             >
               <div className="flex items-center gap-2">
                 <Terminal className="w-4 h-4 text-amber-400" />
-                <span className="text-xs font-semibold text-white">Creación con Python (requests)</span>
+                <span className="text-xs font-semibold text-white">Python Issuance Example (requests)</span>
               </div>
               {expandedSnippets.create_python ? <ChevronDown className="w-4 h-4 text-zinc-400" /> : <ChevronRight className="w-4 h-4 text-zinc-400" />}
             </button>
@@ -522,7 +523,7 @@ class Program
             >
               <div className="flex items-center gap-2">
                 <Code className="w-4 h-4 text-yellow-400" />
-                <span className="text-xs font-semibold text-white">Creación con Node.js / JavaScript</span>
+                <span className="text-xs font-semibold text-white">Node.js / JavaScript Issuance Example</span>
               </div>
               {expandedSnippets.create_node ? <ChevronDown className="w-4 h-4 text-zinc-400" /> : <ChevronRight className="w-4 h-4 text-zinc-400" />}
             </button>
@@ -542,7 +543,7 @@ class Program
             >
               <div className="flex items-center gap-2">
                 <Code className="w-4 h-4 text-indigo-400" />
-                <span className="text-xs font-semibold text-white">Creación con C# (.NET)</span>
+                <span className="text-xs font-semibold text-white">C# (.NET) Issuance Example</span>
               </div>
               {expandedSnippets.create_csharp ? <ChevronDown className="w-4 h-4 text-zinc-400" /> : <ChevronRight className="w-4 h-4 text-zinc-400" />}
             </button>
@@ -562,7 +563,7 @@ class Program
             >
               <div className="flex items-center gap-2">
                 <Terminal className="w-4 h-4 text-zinc-400" />
-                <span className="text-xs font-semibold text-white">Comando cURL para Generar Licencia</span>
+                <span className="text-xs font-semibold text-white">cURL Command for Key Issuance</span>
               </div>
               {expandedSnippets.create_curl ? <ChevronDown className="w-4 h-4 text-zinc-400" /> : <ChevronRight className="w-4 h-4 text-zinc-400" />}
             </button>
@@ -580,55 +581,55 @@ class Program
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-[#5865F2]/20 text-[#5865F2] border border-[#5865F2]/30">DISCORD BOT</span>
-            <h2 className="text-xl font-semibold text-white">3. Bot Oficial de Discord (Slash Commands & Developer Portal)</h2>
+            <h2 className="text-xl font-semibold text-white">3. Official Discord Bot (Slash Commands & Developer Portal)</h2>
           </div>
           <p className="text-sm text-zinc-400">
-            Conecta tu propio bot de Discord para que tus clientes con un rol específico puedan reclamar su licencia automáticamente y resetear su HWID sin intervención manual.
+            Connect your custom Discord bot to allow verified users with a specific role to claim licenses and reset HWIDs automatically.
           </p>
         </div>
 
         {/* Discord Bot Rules Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="p-4 rounded-xl border border-white/10 bg-[#111110] space-y-1">
-            <span className="text-[10px] uppercase font-bold text-indigo-400">1. Límite Estricto</span>
-            <p className="text-xs text-white font-semibold">1 Licencia por Cuenta de Discord</p>
-            <p className="text-[11px] text-zinc-400">Si el usuario ya tiene una clave generada, el bot rechazará reclamos adicionales.</p>
+            <span className="text-[10px] uppercase font-bold text-indigo-400">1. Strict Limit</span>
+            <p className="text-xs text-white font-semibold">1 License per Discord Account</p>
+            <p className="text-[11px] text-zinc-400">If the account already has an issued key, the bot denies further claims.</p>
           </div>
           <div className="p-4 rounded-xl border border-white/10 bg-[#111110] space-y-1">
-            <span className="text-[10px] uppercase font-bold text-amber-400">2. Rol Exclusivo</span>
-            <p className="text-xs text-white font-semibold">Verificación de Rol en el Servidor</p>
-            <p className="text-[11px] text-zinc-400">Solo usuarios con el rol configurado en la web podrán ejecutar /claim.</p>
+            <span className="text-[10px] uppercase font-bold text-amber-400">2. Exclusive Role</span>
+            <p className="text-xs text-white font-semibold">Server Role Verification</p>
+            <p className="text-[11px] text-zinc-400">Only users assigned the configured server role can execute /claim.</p>
           </div>
           <div className="p-4 rounded-xl border border-white/10 bg-[#111110] space-y-1">
-            <span className="text-[10px] uppercase font-bold text-emerald-400">3. Auto-Reset HWID</span>
-            <p className="text-xs text-white font-semibold">Comando /resethwid</p>
-            <p className="text-[11px] text-zinc-400">Al proporcionar su key y usuario, el bot borra el HWID vinculado para pasar a otra PC.</p>
+            <span className="text-[10px] uppercase font-bold text-emerald-400">3. HWID Self-Reset</span>
+            <p className="text-xs text-white font-semibold">/resethwid Command</p>
+            <p className="text-[11px] text-zinc-400">Clears bound hardware locks so customers can migrate to a new PC.</p>
           </div>
         </div>
 
         {/* Step-by-Step Setup Guide */}
         <div className="p-4 rounded-xl border border-white/10 bg-zinc-950/60 space-y-3">
-          <h3 className="text-xs font-bold text-white uppercase tracking-wider">Pasos para Configurar en Discord Developer Portal:</h3>
+          <h3 className="text-xs font-bold text-white uppercase tracking-wider">Discord Developer Portal Setup Steps:</h3>
           <ol className="list-decimal list-inside space-y-1.5 text-xs text-zinc-300">
-            <li>Entra a <a href="https://discord.com/developers/applications" target="_blank" rel="noreferrer" className="text-indigo-400 underline font-mono">discord.com/developers/applications</a> y crea una <strong>New Application</strong>.</li>
-            <li>En la pestaña <strong>Bot</strong>, haz clic en <strong>Reset Token</strong> y copia tu <strong>Bot Token</strong>.</li>
-            <li>En la misma pestaña activa los <strong>Privileged Gateway Intents</strong> (especialmente <strong>Server Members Intent</strong>).</li>
-            <li>Pega tu <strong>Bot Token</strong> y el nombre de tu <strong>Rol Requerido</strong> en la sección del servicio en esta web.</li>
-            <li>Ejecuta el script del bot en tu servidor/PC: <code className="text-emerald-400 font-mono">node discord_bot.js</code> o <code className="text-emerald-400 font-mono">python discord_bot.py</code>.</li>
+            <li>Visit <a href="https://discord.com/developers/applications" target="_blank" rel="noreferrer" className="text-indigo-400 underline font-mono">discord.com/developers/applications</a> and click <strong>New Application</strong>.</li>
+            <li>Go to the <strong>Bot</strong> tab, click <strong>Reset Token</strong>, and copy your <strong>Bot Token</strong>.</li>
+            <li>Enable <strong>Privileged Gateway Intents</strong> (specifically <strong>Server Members Intent</strong>).</li>
+            <li>Save your <strong>Bot Token</strong> and required <strong>Role Name</strong> in the service settings page.</li>
+            <li>Launch the bot runner: <code className="text-emerald-400 font-mono">node discord_bot.js</code> or <code className="text-emerald-400 font-mono">python discord_bot.py</code>.</li>
           </ol>
         </div>
 
         {/* Endpoints Table */}
         <div className="p-4 rounded-xl border border-white/10 bg-[#111110] space-y-2">
-          <span className="text-xs font-semibold text-white">Endpoints Especializados para Discord:</span>
+          <span className="text-xs font-semibold text-white">Dedicated Discord Endpoints:</span>
           <div className="space-y-1.5 text-xs font-mono">
             <div className="flex items-center justify-between p-2 rounded bg-black/40 border border-white/5">
               <span className="text-indigo-400">POST /api/v1/discord/claim</span>
-              <span className="text-zinc-400 text-[11px]">Crea usuario y key vinculados a la cuenta de Discord</span>
+              <span className="text-zinc-400 text-[11px]">Creates user and license bound to the Discord account</span>
             </div>
             <div className="flex items-center justify-between p-2 rounded bg-black/40 border border-white/5">
               <span className="text-emerald-400">POST /api/v1/discord/resethwid</span>
-              <span className="text-zinc-400 text-[11px]">Resetea y elimina el HWID para vincular a una nueva PC</span>
+              <span className="text-zinc-400 text-[11px]">Resets and unbinds HWID to allow binding a new device</span>
             </div>
           </div>
         </div>
@@ -639,10 +640,10 @@ class Program
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">POST</span>
-            <h2 className="text-xl font-semibold text-white">4. Validación de Key en Software / Loader (/api/verify)</h2>
+            <h2 className="text-xl font-semibold text-white">4. Loader / Executable License Verification (/api/verify)</h2>
           </div>
           <p className="text-sm text-zinc-400">
-            Utilizado por el ejecutable/loader para validar una key individual antes de dar acceso al programa.
+            Called by your game loader or software executable to validate single license keys and lock fingerprints prior to runtime access.
           </p>
         </div>
         <CodeBlock code={curlVerifyExample} lang="bash" />
@@ -652,10 +653,10 @@ class Program
       <section className="space-y-4 pt-6 border-t border-white/10">
         <div className="space-y-1">
           <h2 className="text-xl font-semibold text-white flex items-center gap-2">
-            <Cpu className="w-5 h-5 text-emerald-400" /> Probador de API en Vivo (Playground)
+            <Cpu className="w-5 h-5 text-emerald-400" /> Interactive Live API Playground
           </h2>
           <p className="text-sm text-zinc-400">
-            Ingresa los 3 parámetros de tu servicio para probar la consulta directamente desde el navegador:
+            Enter your 3 service parameters to test live API queries directly from your browser:
           </p>
         </div>
 
@@ -665,14 +666,14 @@ class Program
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-white flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4 text-amber-400" />
-                Servicios Disponibles para Probar ({services.length}):
+                Available Services for Testing ({services.length}):
               </label>
-              <span className="text-[10px] text-zinc-400">Haz clic en uno para autocompletar credenciales</span>
+              <span className="text-[10px] text-zinc-400">Click to autofill credentials</span>
             </div>
 
             {services.length === 0 ? (
               <p className="text-xs text-zinc-500 italic py-1">
-                No hay servicios creados aún. Crea un servicio en la sección "Services" para obtener tus API Keys.
+                No services created yet. Create a service in "Services" to generate API Keys.
               </p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 pt-1">
@@ -686,7 +687,7 @@ class Program
                         setTestService(srv.name);
                         setTestApiKey(srv.api_key);
                         setTestSecretId(srv.secret_id);
-                        toast.success(`Credenciales de "${srv.name}" cargadas`);
+                        toast.success(`Credentials loaded for "${srv.name}"`);
                       }}
                       className={`text-left p-2.5 rounded-lg border transition-all duration-200 group relative ${
                         isSelected
@@ -722,7 +723,7 @@ class Program
                 required
                 value={testService}
                 onChange={(e) => setTestService(e.target.value)}
-                placeholder="ej. Vape"
+                placeholder="e.g. Vape"
                 className="w-full bg-zinc-950 border border-white/10 focus:border-white/30 rounded px-3 py-2 text-xs text-white font-mono outline-none"
               />
             </div>
@@ -756,13 +757,13 @@ class Program
             className="bg-[#EEEEEC] hover:bg-white text-zinc-950 px-5 py-2.5 rounded-md text-xs font-bold flex items-center gap-2 transition-colors duration-200"
           >
             <Play className="w-4 h-4 fill-current" />
-            {testing ? 'Consultando API...' : 'Ejecutar Consulta API'}
+            {testing ? 'Executing Query...' : 'Run API Query'}
           </button>
         </form>
 
         {testResult && (
           <div className="space-y-2">
-            <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Resultado Devuelto por la API:</h3>
+            <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">API Response:</h3>
             <CodeBlock code={JSON.stringify(testResult, null, 2)} lang="json" />
           </div>
         )}

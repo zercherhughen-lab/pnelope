@@ -19,7 +19,7 @@ export const Register: React.FC = () => {
     setLoading(true);
     try {
       await register(email, password);
-      toast.success('Cuenta de desarrollador creada con éxito');
+      toast.success('Developer account created successfully');
       navigate('/dashboard');
     } catch (err: any) {
       toast.error(formatErr(err.response?.data?.detail));
@@ -32,10 +32,10 @@ export const Register: React.FC = () => {
     setGoogleLoading(true);
     try {
       await demoLogin();
-      toast.success('¡Registrado y autenticado con Google exitosamente!');
+      toast.success('Registered & authenticated with Google!');
       navigate('/dashboard');
     } catch (err: any) {
-      toast.error('Error al registrar con Google');
+      toast.error('Failed to register with Google');
     } finally {
       setGoogleLoading(false);
     }
@@ -49,9 +49,9 @@ export const Register: React.FC = () => {
       <div className="w-full max-w-md space-y-6 relative z-10">
         <div className="text-center space-y-2 flex flex-col items-center">
           <VapeLogo height={36} />
-          <h1 className="text-2xl font-bold tracking-tight text-white pt-2">Crear Cuenta</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-white pt-2">Create developer account</h1>
           <p className="text-xs text-zinc-400 max-w-xs">
-            Crea tu cuenta de desarrollador para emitir y verificar licencias.
+            Start issuing cloud licenses, enforcing HWID locks, and linking Discord bots.
           </p>
         </div>
 
@@ -83,31 +83,31 @@ export const Register: React.FC = () => {
                 d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
               />
             </svg>
-            <span>{googleLoading ? 'Conectando con Google...' : 'Registrarse con Google'}</span>
+            <span>{googleLoading ? 'Connecting with Google...' : 'Sign up with Google'}</span>
           </button>
 
           <div className="flex items-center gap-3">
             <div className="h-px bg-white/10 flex-1" />
-            <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-mono">O con tu email</span>
+            <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-mono">Or with email</span>
             <div className="h-px bg-white/10 flex-1" />
           </div>
 
           <form data-testid="register-form" onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-300">Correo Electrónico</label>
+              <label className="text-xs font-semibold text-zinc-300">Email Address</label>
               <input
                 type="email"
                 required
                 data-testid="register-email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="tu_email@ejemplo.com"
+                placeholder="developer@company.dev"
                 className="w-full bg-zinc-950 border border-white/10 focus:border-white/40 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none transition-colors"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-300">Contraseña</label>
+              <label className="text-xs font-semibold text-zinc-300">Password</label>
               <input
                 type="password"
                 required
@@ -115,7 +115,7 @@ export const Register: React.FC = () => {
                 data-testid="register-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Mínimo 6 caracteres"
+                placeholder="At least 6 characters"
                 className="w-full bg-zinc-950 border border-white/10 focus:border-white/40 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none transition-colors font-mono"
               />
             </div>
@@ -126,15 +126,15 @@ export const Register: React.FC = () => {
               data-testid="register-submit"
               className="w-full bg-white hover:bg-zinc-200 disabled:opacity-50 py-2.5 rounded-xl text-xs font-bold text-zinc-950 transition-colors duration-150 shadow-md mt-2 flex items-center justify-center gap-2"
             >
-              <span>{loading ? 'Creando cuenta...' : 'Crear Cuenta'}</span>
+              <span>{loading ? 'Creating account...' : 'Create Account'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </form>
 
           <div className="pt-2 text-center text-xs text-zinc-500">
-            ¿Ya tienes una cuenta?{' '}
+            Already have an account?{' '}
             <Link to="/login" data-testid="register-to-login" className="text-zinc-300 hover:text-white font-medium underline underline-offset-2">
-              Iniciar sesión
+              Sign in
             </Link>
           </div>
         </div>

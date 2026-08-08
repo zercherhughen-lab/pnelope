@@ -26,10 +26,10 @@ export const Landing: React.FC = () => {
   const handleGoogleLogin = async () => {
     try {
       await demoLogin();
-      toast.success('¡Autenticado con Google exitosamente!');
+      toast.success('Successfully authenticated with Google!');
       navigate('/dashboard');
     } catch (e) {
-      toast.error('Error al ingresar con Google');
+      toast.error('Failed to sign in with Google');
     }
   };
 
@@ -49,10 +49,10 @@ export const Landing: React.FC = () => {
         </div>
 
         <nav className="hidden md:flex items-center gap-8 text-xs text-zinc-400 font-medium">
-          <Link to="/services" className="hover:text-white transition-colors">Servicios</Link>
-          <Link to="/licenses" className="hover:text-white transition-colors">Licencias</Link>
+          <Link to="/services" className="hover:text-white transition-colors">Services</Link>
+          <Link to="/licenses" className="hover:text-white transition-colors">Licenses</Link>
           <Link to="/settings" className="hover:text-white transition-colors">Discord Bot</Link>
-          <Link to="/docs" className="hover:text-white transition-colors">Documentación</Link>
+          <Link to="/docs" className="hover:text-white transition-colors">Documentation</Link>
         </nav>
 
         <div className="flex items-center gap-3">
@@ -61,7 +61,7 @@ export const Landing: React.FC = () => {
               to="/dashboard"
               className="bg-white hover:bg-zinc-200 text-zinc-950 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2 active:scale-95"
             >
-              <span>Ir al Dashboard</span>
+              <span>Go to Dashboard</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           ) : (
@@ -70,7 +70,7 @@ export const Landing: React.FC = () => {
                 to="/login"
                 className="text-xs text-zinc-400 hover:text-white font-medium px-2 py-1.5 transition-colors hidden sm:inline-block"
               >
-                Iniciar Sesión
+                Sign in
               </Link>
               <button
                 onClick={handleGoogleLogin}
@@ -82,7 +82,7 @@ export const Landing: React.FC = () => {
                   <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
                   <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
                 </svg>
-                <span>Continuar con Google</span>
+                <span>Continue with Google</span>
               </button>
             </>
           )}
@@ -95,7 +95,7 @@ export const Landing: React.FC = () => {
           {/* Cyber Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-white/5 border border-white/10 text-zinc-300">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="font-mono text-[11px] uppercase tracking-wider">PROTECCIÓN SHA-256 • LICENCIAS CLOUD • DISCORD BOT</span>
+            <span className="font-mono text-[11px] uppercase tracking-wider">SHA-256 PROTECTION • CLOUD LICENSING • DISCORD BOT</span>
           </div>
 
           {/* Main Headline */}
@@ -104,7 +104,7 @@ export const Landing: React.FC = () => {
           </h1>
 
           <p className="text-zinc-400 text-sm sm:text-base max-w-xl leading-relaxed">
-            Protege tus loaders, aplicaciones y ejecutables con verificación en tiempo real, bloqueo de hardware SHA-256, auto-reset de HWID y conexión directa con tu bot oficial de Discord.
+            Protect your loaders, applications, and binaries with real-time verification, SHA-256 hardware locking, self-service HWID resets, and seamless Discord bot integration.
           </p>
 
           {/* Action CTAs */}
@@ -119,14 +119,14 @@ export const Landing: React.FC = () => {
                 <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
                 <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
               </svg>
-              <span>Continuar con Google</span>
+              <span>Continue with Google</span>
             </button>
 
             <Link
               to="/dashboard"
               className="border border-white/15 bg-white/5 hover:bg-white/10 text-white px-7 py-3.5 rounded-xl font-bold transition-all text-xs flex items-center gap-2 active:scale-95 shadow-sm"
             >
-              <span>Abrir Dashboard</span>
+              <span>Open Dashboard</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -158,7 +158,7 @@ export const Landing: React.FC = () => {
   },
   "discord": {
     "bot_synced": true,
-    "role": "Cliente"
+    "role": "Client"
   }
 }`}</code>
           </pre>
@@ -172,7 +172,7 @@ export const Landing: React.FC = () => {
             </div>
             <h3 className="text-base font-semibold text-white">Hardware Lock (HWID)</h3>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Huella digital única por equipo que previene fugas de software y duplicación no autorizada.
+              Unique device fingerprinting that prevents software leaks, cracking, and unauthorized redistribution.
             </p>
           </div>
 
@@ -180,9 +180,9 @@ export const Landing: React.FC = () => {
             <div className="flex size-[40px] items-center justify-center rounded-xl bg-zinc-900 border border-white/10 text-white">
               <Bot className="w-4 h-4" />
             </div>
-            <h3 className="text-base font-semibold text-white">Ecosistema Discord Bot</h3>
+            <h3 className="text-base font-semibold text-white">Discord Bot Ecosystem</h3>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Comandos <code className="text-white font-mono">/claim</code> y <code className="text-white font-mono">/resethwid</code> con límite de 1 cuenta y verificación de rol.
+              Slash commands <code className="text-white font-mono">/claim</code> and <code className="text-white font-mono">/resethwid</code> with 1-account limit and server role verification.
             </p>
           </div>
 
@@ -190,9 +190,9 @@ export const Landing: React.FC = () => {
             <div className="flex size-[40px] items-center justify-center rounded-xl bg-zinc-900 border border-white/10 text-white">
               <Zap className="w-4 h-4" />
             </div>
-            <h3 className="text-base font-semibold text-white">Serverless Instantáneo</h3>
+            <h3 className="text-base font-semibold text-white">Sub-35ms Serverless</h3>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Respuestas instantáneas en Vercel Edge con tolerancia a fallos y sin tiempos de espera.
+              Global edge distribution on Vercel with fault-tolerant caching, zero cold starts, and 99.99% uptime.
             </p>
           </div>
         </div>
@@ -202,13 +202,13 @@ export const Landing: React.FC = () => {
       <footer className="border-t border-white/10 px-6 py-6 text-center text-xs text-zinc-500 relative z-10 flex flex-col sm:flex-row items-center justify-between max-w-7xl mx-auto w-full gap-4">
         <div className="flex items-center gap-2">
           <VapeLogo height={20} />
-          <span>&copy; 2026 Vape Platform. Todos los derechos reservados.</span>
+          <span>&copy; 2026 Vape Platform. All rights reserved.</span>
         </div>
         <div className="flex items-center gap-5 text-zinc-400">
-          <Link to="/home" className="hover:text-white transition-colors">Inicio</Link>
-          <Link to="/login" className="hover:text-white transition-colors">Iniciar Sesión</Link>
-          <Link to="/register" className="hover:text-white transition-colors">Crear Cuenta</Link>
-          <Link to="/docs" className="hover:text-white transition-colors">Documentación</Link>
+          <Link to="/home" className="hover:text-white transition-colors">Home</Link>
+          <Link to="/login" className="hover:text-white transition-colors">Sign in</Link>
+          <Link to="/register" className="hover:text-white transition-colors">Create Account</Link>
+          <Link to="/docs" className="hover:text-white transition-colors">Documentation</Link>
           <Link to="/dashboard" className="hover:text-white transition-colors">Dashboard</Link>
         </div>
       </footer>

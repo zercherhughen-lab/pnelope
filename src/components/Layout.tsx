@@ -15,8 +15,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   // Category collapse states
   const [openNavCategories, setOpenNavCategories] = useState<{ [key: string]: boolean }>({
-    principal: true,
-    gestion: true,
+    main: true,
+    management: true,
   });
 
   const toggleNavCategory = (catKey: string) => {
@@ -25,17 +25,17 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   const navCategories = [
     {
-      key: 'principal',
-      title: 'Principal',
+      key: 'main',
+      title: 'Main',
       icon: FolderKanban,
       items: [
         { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, testid: 'nav-dashboard' },
-        { to: '/stats', label: 'Estadísticas', icon: BarChart3, testid: 'nav-stats' },
+        { to: '/stats', label: 'Analytics', icon: BarChart3, testid: 'nav-stats' },
       ],
     },
     {
-      key: 'gestion',
-      title: 'Servicios & Claves',
+      key: 'management',
+      title: 'Services & Keys',
       icon: Shield,
       items: [
         { to: '/services', label: 'Services', icon: Boxes, testid: 'nav-services' },
@@ -153,7 +153,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           }
         >
           <Settings className="w-3.5 h-3.5 text-white shrink-0" />
-          <span>Ajustes</span>
+          <span>Settings</span>
         </NavLink>
 
         {/* Search bar */}
@@ -161,7 +161,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-[calc(50%+2px)] -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
-            placeholder="Buscar..."
+            placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-[#0b0b0a] border border-white/10 focus:border-white/30 rounded-lg pl-8 pr-7 py-1.5 text-xs text-white placeholder-zinc-500 outline-none transition-colors"
@@ -187,7 +187,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           className="w-full flex items-center gap-2.5 px-2.5 py-2 md:py-1.5 rounded-lg text-xs text-zinc-400 hover:bg-white/10 hover:text-white border border-transparent hover:border-white/20 transition-all duration-200"
         >
           <LogOut className="w-3.5 h-3.5 text-white shrink-0" />
-          <span>Salir</span>
+          <span>Sign Out</span>
         </button>
       </div>
     </>
@@ -210,7 +210,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
       {/* Mobile Sidebar Drawer */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#111110] border-r border-white/10 flex flex-col transition-transform duration-300 md:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#111110] border-r border-white/10 flex-col transition-transform duration-300 md:hidden ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -227,14 +227,14 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               type="button"
               onClick={() => setMobileMenuOpen(true)}
               className="md:hidden text-zinc-300 hover:text-white p-1.5 rounded-lg hover:bg-white/10 border border-white/10 shrink-0"
-              aria-label="Abrir menú"
+              aria-label="Open menu"
             >
               <Menu className="w-5 h-5" />
             </button>
 
             <div className="flex items-center gap-1.5 text-xs text-zinc-400 font-medium shrink-0">
               <Layers className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-              <span className="hidden sm:inline">Servicio Activo:</span>
+              <span className="hidden sm:inline">Active Service:</span>
             </div>
 
             {/* Custom Dropdown Selector */}
@@ -250,13 +250,13 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 }}
                 className="w-full bg-[#181816] hover:bg-[#20201d] text-white text-xs font-semibold px-2.5 sm:px-3 py-1.5 pr-7 sm:pr-8 rounded-lg border border-white/15 outline-none cursor-pointer transition-colors shadow-sm appearance-none truncate"
               >
-                <option value="all">Todos los Servicios ({services.length})</option>
+                <option value="all">All Services ({services.length})</option>
                 {services.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.name} ({s.prefix || 'VAPE'})
                   </option>
                 ))}
-                <option value="__new__">+ Crear servicio...</option>
+                <option value="__new__">+ New service...</option>
               </select>
               <ChevronDown className="w-3.5 h-3.5 text-zinc-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>

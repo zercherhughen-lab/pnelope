@@ -29,7 +29,7 @@ export const Services: React.FC = () => {
     setSubmitting(true);
     try {
       const res = await api.post('/services', { name, prefix, description });
-      toast.success('Servicio creado correctamente');
+      toast.success('Service application created successfully');
       setName('');
       setPrefix('');
       setDescription('');
@@ -38,7 +38,7 @@ export const Services: React.FC = () => {
 
       // Open Secret Reveal Dialog
       setRevealData({
-        title: `Credenciales del Servicio: ${res.data.service.name}`,
+        title: `Service Credentials: ${res.data.service.name}`,
         api_key: res.data.api_key,
         secret_id: res.data.secret_id,
       });
@@ -54,7 +54,7 @@ export const Services: React.FC = () => {
     setDeleting(true);
     try {
       await api.delete(`/services/${deleteTarget.id}`);
-      toast.success(`Servicio "${deleteTarget.name}" eliminado`);
+      toast.success(`Service "${deleteTarget.name}" deleted`);
       setDeleteTarget(null);
       await fetchServices();
     } catch (err: any) {
@@ -74,9 +74,9 @@ export const Services: React.FC = () => {
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
         <div>
-          <h1 className="text-[24px] font-medium sm:text-[38px] sm:font-semibold text-[#EEEEEC] tracking-tight">Servicios & Rango</h1>
+          <h1 className="text-[24px] font-medium sm:text-[38px] sm:font-semibold text-[#EEEEEC] tracking-tight">Services & Ranks</h1>
           <p className="text-[15px] sm:text-[16px] text-[#B5B3AD] mt-1">
-            Crea aplicaciones de servicio, configura credenciales (API Key y Secret ID) y administra roles o rangos.
+            Create service applications, manage credentials (API Key and Secret ID), and configure user roles.
           </p>
         </div>
         <button
@@ -85,7 +85,7 @@ export const Services: React.FC = () => {
           className="bg-[#EEEEEC] hover:bg-white text-zinc-950 px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 self-start transition-colors duration-200 shadow-sm"
         >
           <Plus className="w-4 h-4" />
-          <span>Crear Servicio</span>
+          <span>New Service</span>
         </button>
       </div>
 
@@ -96,40 +96,40 @@ export const Services: React.FC = () => {
           onSubmit={handleCreate}
           className="p-6 rounded-xl border border-white/20 bg-white/5 space-y-4 animate-in fade-in duration-200"
         >
-          <h2 className="font-semibold text-white text-lg">Nuevo Servicio / Aplicación</h2>
+          <h2 className="font-semibold text-white text-lg">New Service Application</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Nombre del Servicio *</label>
+              <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Service Name *</label>
               <input
                 type="text"
                 required
                 data-testid="new-service-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="ej. Vape Cheat, Discord Bot, Licensing App"
+                placeholder="e.g. Vape Client, Discord Bot, Licensing App"
                 className="w-full bg-zinc-950 border border-white/10 focus:border-white/30 rounded-md px-3.5 py-2 text-sm outline-none transition-colors duration-200 text-white"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Prefijo de Key (Opcional)</label>
+              <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Key Prefix (Optional)</label>
               <input
                 type="text"
                 data-testid="new-service-prefix"
                 value={prefix}
                 onChange={(e) => setPrefix(e.target.value)}
-                placeholder="ej. VAPE (Predeterminado: VAUTH)"
+                placeholder="e.g. VAPE (Default: VAUTH)"
                 className="w-full bg-zinc-950 border border-white/10 focus:border-white/30 rounded-md px-3.5 py-2 text-sm outline-none transition-colors duration-200 text-white"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Descripción</label>
+            <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Description</label>
             <input
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Breve resumen del servicio"
+              placeholder="Brief summary of the application"
               className="w-full bg-zinc-950 border border-white/10 focus:border-white/30 rounded-md px-3.5 py-2 text-sm outline-none transition-colors duration-200 text-white"
             />
           </div>
@@ -141,7 +141,7 @@ export const Services: React.FC = () => {
               data-testid="submit-create-service"
               className="bg-[#EEEEEC] hover:bg-white disabled:opacity-50 text-zinc-950 px-5 py-2 rounded-md text-sm font-semibold transition-colors duration-200"
             >
-              {submitting ? 'Guardando...' : 'Guardar Servicio'}
+              {submitting ? 'Saving...' : 'Save Service'}
             </button>
             <button
               type="button"
@@ -149,7 +149,7 @@ export const Services: React.FC = () => {
               onClick={() => setShowForm(false)}
               className="px-4 py-2 rounded-md text-sm font-medium text-zinc-400 hover:text-white transition-colors duration-200"
             >
-              Cancelar
+              Cancel
             </button>
           </div>
         </form>
@@ -157,13 +157,13 @@ export const Services: React.FC = () => {
 
       {/* Services List */}
       {loading ? (
-        <div className="text-center py-12 text-zinc-500">Cargando servicios...</div>
+        <div className="text-center py-12 text-zinc-500">Loading services...</div>
       ) : services.length === 0 ? (
         <div className="p-12 text-center rounded-xl border border-white/10 bg-[#111110] space-y-3">
           <Layers className="w-10 h-10 text-zinc-600 mx-auto" />
-          <h3 className="text-white font-medium text-lg">No hay servicios creados aún</h3>
+          <h3 className="text-white font-medium text-lg">No services created yet</h3>
           <p className="text-sm text-zinc-500 max-w-sm mx-auto">
-            Crea tu primer servicio para comenzar a administrar credenciales de API y emitir licencias.
+            Create your first service to start managing API credentials and issuing licenses.
           </p>
         </div>
       ) : (
@@ -192,14 +192,14 @@ export const Services: React.FC = () => {
                   <button
                     onClick={() => setDeleteTarget({ id: srv.id, name: srv.name })}
                     className="p-1.5 rounded text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors duration-200"
-                    title="Eliminar Servicio"
+                    title="Delete Service"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
 
                 <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed">
-                  {srv.description || 'Sin descripción proporcionada.'}
+                  {srv.description || 'No description provided.'}
                 </p>
 
                 {/* API Key / Secret Preview */}
@@ -218,14 +218,14 @@ export const Services: React.FC = () => {
               <div className="pt-4 border-t border-white/5 flex items-center justify-between text-xs text-zinc-500">
                 <div className="flex items-center gap-4">
                   <span>{srv.licenses_count ?? 0} Keys</span>
-                  <span>{srv.ranks_count ?? 0} Rango(s)</span>
+                  <span>{srv.ranks_count ?? 0} Rank(s)</span>
                 </div>
 
                 <Link
                   to={`/services/${srv.id}`}
                   className="flex items-center gap-1.5 text-white font-medium hover:underline underline-offset-4"
                 >
-                  <span>Gestionar Rango / Credenciales</span>
+                  <span>Manage Ranks & Secrets</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
@@ -240,9 +240,9 @@ export const Services: React.FC = () => {
       {/* Delete Confirmation Modal */}
       <ConfirmModal
         open={!!deleteTarget}
-        title={`¿Eliminar servicio "${deleteTarget?.name}"?`}
-        description="Esta acción eliminará permanentemente la aplicación de servicio junto con todas sus claves de licencia y rangos configurados en la base de datos."
-        confirmLabel="Sí, Eliminar Servicio"
+        title={`Delete service "${deleteTarget?.name}"?`}
+        description="This action will permanently delete the service application along with all its license keys and rank configurations."
+        confirmLabel="Yes, Delete Service"
         confirmVariant="danger"
         loading={deleting}
         onClose={() => setDeleteTarget(null)}

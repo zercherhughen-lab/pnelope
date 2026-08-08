@@ -35,7 +35,7 @@ export const Dashboard: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
         <div>
           <h1 className="text-[24px] font-medium sm:text-[38px] sm:font-semibold text-[#EEEEEC] tracking-tight">Dashboard</h1>
-          <p className="text-[15px] sm:text-[16px] text-[#B5B3AD] mt-1">Resumen de tus servicios registrados y métricas principales.</p>
+          <p className="text-[15px] sm:text-[16px] text-[#B5B3AD] mt-1">Summary of registered services, telemetry, and active license keys.</p>
         </div>
         <div className="flex items-center gap-3 self-start">
           <Link
@@ -44,14 +44,14 @@ export const Dashboard: React.FC = () => {
             className="border border-[#222221] hover:border-[#333330] bg-[#161614] hover:bg-[#1c1c1a] text-zinc-300 hover:text-white px-3.5 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-all duration-200"
           >
             <BarChart3 className="w-4 h-4 text-white" />
-            <span>Ver Estadísticas</span>
+            <span>View Analytics</span>
           </Link>
           <Link
             to="/services"
             data-testid="dashboard-create-service-link"
             className="bg-[#EEEEEC] hover:bg-white text-zinc-950 px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 shadow-sm"
           >
-            <span>Gestionar Servicios</span>
+            <span>Manage Services</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -65,7 +65,7 @@ export const Dashboard: React.FC = () => {
           style={{ boxShadow: 'rgba(0, 0, 0, 0.3) 0px 0px 0px 1px' }}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[15px] sm:text-[16px] font-medium text-[#B5B3AD]">Servicios</span>
+            <span className="text-[15px] sm:text-[16px] font-medium text-[#B5B3AD]">Services</span>
             <div className="flex size-[36px] items-center justify-center rounded-[8px] border border-[#222221] bg-[#191918]" style={{ boxShadow: 'rgba(0, 0, 0, 0.3) 0px 0px 0px 1px' }}>
               <Layers className="w-4 h-4 text-white" />
             </div>
@@ -81,7 +81,7 @@ export const Dashboard: React.FC = () => {
           style={{ boxShadow: 'rgba(0, 0, 0, 0.3) 0px 0px 0px 1px' }}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[15px] sm:text-[16px] font-medium text-[#B5B3AD]">Total Licencias</span>
+            <span className="text-[15px] sm:text-[16px] font-medium text-[#B5B3AD]">Total Licenses</span>
             <div className="flex size-[36px] items-center justify-center rounded-[8px] border border-[#222221] bg-[#191918]" style={{ boxShadow: 'rgba(0, 0, 0, 0.3) 0px 0px 0px 1px' }}>
               <KeyRound className="w-4 h-4 text-white" />
             </div>
@@ -97,7 +97,7 @@ export const Dashboard: React.FC = () => {
           style={{ boxShadow: 'rgba(0, 0, 0, 0.3) 0px 0px 0px 1px' }}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[15px] sm:text-[16px] font-medium text-[#B5B3AD]">Licencias Activas</span>
+            <span className="text-[15px] sm:text-[16px] font-medium text-[#B5B3AD]">Active Keys</span>
             <div className="flex size-[36px] items-center justify-center rounded-[8px] border border-[#222221] bg-[#191918]" style={{ boxShadow: 'rgba(0, 0, 0, 0.3) 0px 0px 0px 1px' }}>
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
             </div>
@@ -113,7 +113,7 @@ export const Dashboard: React.FC = () => {
           style={{ boxShadow: 'rgba(0, 0, 0, 0.3) 0px 0px 0px 1px' }}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[15px] sm:text-[16px] font-medium text-[#B5B3AD]">Usuarios Únicos</span>
+            <span className="text-[15px] sm:text-[16px] font-medium text-[#B5B3AD]">Unique Users</span>
             <div className="flex size-[36px] items-center justify-center rounded-[8px] border border-[#222221] bg-[#191918]" style={{ boxShadow: 'rgba(0, 0, 0, 0.3) 0px 0px 0px 1px' }}>
               <Users className="w-4 h-4 text-white" />
             </div>
@@ -131,14 +131,14 @@ export const Dashboard: React.FC = () => {
             <div className="flex size-[32px] items-center justify-center rounded-[8px] border border-[#222221] bg-[#191918]" style={{ boxShadow: 'rgba(0, 0, 0, 0.3) 0px 0px 0px 1px' }}>
               <Activity className="w-4 h-4 text-white" />
             </div>
-            <h2 className="font-semibold text-white">Registros de Verificación Recientes</h2>
+            <h2 className="font-semibold text-white">Recent Verification Logs</h2>
           </div>
         </div>
 
         {loading ? (
-          <div className="text-sm text-zinc-500 py-8 text-center">Cargando actividad...</div>
+          <div className="text-sm text-zinc-500 py-8 text-center">Loading activity...</div>
         ) : !stats?.recent_verifications?.length ? (
-          <div className="text-sm text-zinc-500 py-8 text-center">No hay solicitudes de verificación registradas.</div>
+          <div className="text-sm text-zinc-500 py-8 text-center">No verification requests recorded yet.</div>
         ) : (
           <div className="divide-y divide-white/5 overflow-x-auto">
             {stats.recent_verifications.map((log) => (

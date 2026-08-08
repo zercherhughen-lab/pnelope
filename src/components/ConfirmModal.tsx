@@ -17,7 +17,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   open,
   title,
   description,
-  confirmLabel = 'Confirmar',
+  confirmLabel = 'Confirm',
   confirmVariant = 'warning',
   loading = false,
   onClose,
@@ -72,7 +72,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
               disabled={loading}
               className="px-4 py-2 rounded-lg text-xs font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
             >
-              Cancelar
+              Cancel
             </button>
 
             <button

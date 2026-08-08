@@ -63,7 +63,7 @@ export const ExpirationCountdown: React.FC<ExpirationCountdownProps> = ({
             <ShieldCheck className="w-3 h-3 text-emerald-400" />
             Lifetime
           </span>
-          <span className="text-[10px] text-zinc-400">Vitalicia</span>
+          <span className="text-[10px] text-zinc-400">Never expires</span>
         </div>
         <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden border border-white/5">
           <div className="bg-emerald-500 h-full w-full rounded-full" />
@@ -81,7 +81,7 @@ export const ExpirationCountdown: React.FC<ExpirationCountdownProps> = ({
             <Clock className="w-3 h-3 text-amber-400" />
             {duration || '30 Days'}
           </span>
-          <span className="text-[9px] text-zinc-400 font-mono">1er uso</span>
+          <span className="text-[9px] text-zinc-400 font-mono">1st launch</span>
         </div>
         <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden border border-white/5">
           <div className="bg-amber-400/50 h-full w-full rounded-full" />
@@ -99,7 +99,7 @@ export const ExpirationCountdown: React.FC<ExpirationCountdownProps> = ({
         <div className="flex items-center justify-between text-[11px] font-medium text-rose-400">
           <span className="flex items-center gap-1">
             <AlertCircle className="w-3 h-3" />
-            Expirado
+            Expired
           </span>
           <span className="text-[10px] text-zinc-500 font-mono">0s</span>
         </div>

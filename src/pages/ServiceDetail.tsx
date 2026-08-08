@@ -40,7 +40,7 @@ const CredentialCard: React.FC<{ label: string; value: string; testid?: string }
     e.stopPropagation();
     navigator.clipboard.writeText(value);
     setCopied(true);
-    toast.success(`¡${label} copiado al portapapeles!`);
+    toast.success(`${label} copied to clipboard!`);
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -63,13 +63,13 @@ const CredentialCard: React.FC<{ label: string; value: string; testid?: string }
           <span>{label}</span>
           <span className="text-[9px] text-zinc-400 font-normal flex items-center gap-1">
             {hovered ? <Eye className="w-3 h-3 text-emerald-400" /> : <EyeOff className="w-3 h-3 text-zinc-500" />}
-            {hovered ? 'Revelado' : 'Toca o pasa cursor'}
+            {hovered ? 'Revealed' : 'Hover to reveal'}
           </span>
         </div>
         <button
           onClick={handleCopy}
           className="p-1 rounded text-zinc-500 hover:text-white hover:bg-white/10 transition-colors duration-150"
-          title={`Copiar ${label}`}
+          title={`Copy ${label}`}
         >
           {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
         </button>
@@ -96,7 +96,7 @@ export const ServiceDetail: React.FC = () => {
   const [durationMode, setDurationMode] = useState<'preset' | 'custom'>('preset');
   const [presetDuration, setPresetDuration] = useState('30 Days');
   const [customValue, setCustomValue] = useState('10');
-  const [customUnit, setCustomUnit] = useState<string>('Segundos');
+  const [customUnit, setCustomUnit] = useState<string>('Seconds');
   const [exactDate, setExactDate] = useState('');
 
   const [rank, setRank] = useState('Default');
@@ -170,7 +170,7 @@ export const ServiceDetail: React.FC = () => {
         discord_role_name: discordRoleName,
         discord_bot_enabled: discordEnabled,
       });
-      toast.success('Configuración del Bot de Discord guardada con éxito');
+      toast.success('Discord Bot settings saved successfully');
       fetchServiceData();
     } catch (err: any) {
       toast.error(formatErr(err.response?.data?.detail));
@@ -186,7 +186,7 @@ export const ServiceDetail: React.FC = () => {
   const getComputedDurationString = () => {
     if (durationMode === 'preset') return presetDuration;
     if (exactDate) return exactDate;
-    if (customUnit === 'Lifetime' || customUnit === 'Vitalicia') return 'Lifetime';
+    if (customUnit === 'Lifetime') return 'Lifetime';
     return `${customValue} ${customUnit}`;
   };
 
@@ -204,7 +204,7 @@ export const ServiceDetail: React.FC = () => {
         notes,
         expires_at: exactDate || undefined,
       });
-      toast.success('Licencia generada correctamente');
+      toast.success('License generated successfully');
       setUsername('');
       setHwid('');
       setNotes('');
@@ -222,7 +222,7 @@ export const ServiceDetail: React.FC = () => {
     if (!id) return;
     try {
       await api.patch(`/services/${id}/licenses/${licId}`, { status: newStatus });
-      toast.success(`Estado actualizado a ${newStatus}`);
+      toast.success(`Status updated to ${newStatus}`);
       fetchServiceData();
     } catch (err: any) {
       toast.error(formatErr(err.response?.data?.detail));
@@ -233,7 +233,7 @@ export const ServiceDetail: React.FC = () => {
     if (!id) return;
     try {
       await api.patch(`/services/${id}/licenses/${licId}`, { hwid: '' });
-      toast.success('HWID desvinculado y removido con éxito');
+      toast.success('HWID unlinked and removed successfully');
       fetchServiceData();
     } catch (err: any) {
       toast.error(formatErr(err.response?.data?.detail));
@@ -242,14 +242,14 @@ export const ServiceDetail: React.FC = () => {
 
   const handleEditHwid = async (licId: string, currentHwid: string) => {
     if (!id) return;
-    const newHwid = prompt('Ingresa la nueva cadena HWID (déjala en blanco para desvincular):', currentHwid || '');
+    const newHwid = prompt('Enter new HWID string (leave blank to unbind):', currentHwid || '');
     if (newHwid === null) return;
     try {
       await api.patch(`/services/${id}/licenses/${licId}`, { hwid: newHwid.trim() });
       if (!newHwid.trim()) {
-        toast.success('HWID desvinculado');
+        toast.success('HWID unlinked');
       } else {
-        toast.success('HWID actualizado');
+        toast.success('HWID updated');
       }
       fetchServiceData();
     } catch (err: any) {
@@ -261,7 +261,7 @@ export const ServiceDetail: React.FC = () => {
     if (!id || !editingLic) return;
     try {
       await api.patch(`/services/${id}/licenses/${editingLic.id}`, { duration: editDurationVal });
-      toast.success('Duración de licencia actualizada');
+      toast.success('License duration updated successfully');
       setEditingLic(null);
       fetchServiceData();
     } catch (err: any) {
@@ -270,10 +270,10 @@ export const ServiceDetail: React.FC = () => {
   };
 
   const handleDeleteLicense = async (licId: string) => {
-    if (!id || !confirm('¿Eliminar esta clave de licencia permanentemente?')) return;
+    if (!id || !confirm('Permanently delete this license key?')) return;
     try {
       await api.delete(`/services/${id}/licenses/${licId}`);
-      toast.success('Licencia eliminada');
+      toast.success('License deleted');
       fetchServiceData();
     } catch (err: any) {
       toast.error(formatErr(err.response?.data?.detail));
@@ -288,7 +288,7 @@ export const ServiceDetail: React.FC = () => {
       await api.post(`/services/${id}/ranks/${encodeURIComponent(rankName.trim())}`, {
         color: rankColor,
       });
-      toast.success('Rank added');
+      toast.success('Rank added successfully');
       setRankName('');
       setShowRankForm(false);
       fetchServiceData();
@@ -316,29 +316,29 @@ export const ServiceDetail: React.FC = () => {
     try {
       if (confirmModal.type === 'reset-api-key') {
         const res = await api.post(`/services/${id}/reset-api-key`);
-        toast.success('API Key restablecida con éxito');
+        toast.success('API Key reset successfully');
         fetchServiceData();
         setRevealData({
-          title: 'Nueva API Key Generada',
+          title: 'New API Key Generated',
           api_key: res.data.api_key,
-          secret_id: '(sin cambios)',
+          secret_id: '(unchanged)',
         });
       } else if (confirmModal.type === 'reset-secret-id') {
         const res = await api.post(`/services/${id}/reset-secret-id`);
-        toast.success('Secret ID restablecido con éxito');
+        toast.success('Secret ID reset successfully');
         fetchServiceData();
         setRevealData({
-          title: 'Nuevo Secret ID Generado',
-          api_key: '(sin cambios)',
+          title: 'New Secret ID Generated',
+          api_key: '(unchanged)',
           secret_id: res.data.secret_id,
         });
       } else if (confirmModal.type === 'delete-license' && confirmModal.targetId) {
         await api.delete(`/services/${id}/licenses/${confirmModal.targetId}`);
-        toast.success('Licencia eliminada');
+        toast.success('License deleted');
         fetchServiceData();
       } else if (confirmModal.type === 'reset-hwid' && confirmModal.targetId) {
         await api.patch(`/services/${id}/licenses/${confirmModal.targetId}`, { hwid: '' });
-        toast.success('HWID desvinculado con éxito');
+        toast.success('HWID unlinked successfully');
         fetchServiceData();
       }
       setConfirmModal(null);
@@ -354,8 +354,8 @@ export const ServiceDetail: React.FC = () => {
       open: true,
       type: 'reset-hwid',
       targetId: licId,
-      title: '¿Desvincular HWID de la licencia?',
-      description: 'El cliente podrá vincular un nuevo hardware ID en el siguiente inicio de sesión.',
+      title: 'Unlink HWID from license?',
+      description: 'The client will be able to bind a new hardware ID on their next launch.',
       variant: 'warning',
     });
   };
@@ -365,8 +365,8 @@ export const ServiceDetail: React.FC = () => {
       open: true,
       type: 'delete-license',
       targetId: licId,
-      title: '¿Eliminar clave de licencia?',
-      description: 'Esta clave se eliminará de forma permanente.',
+      title: 'Delete license key?',
+      description: 'This license key will be permanently removed from the database.',
       variant: 'danger',
     });
   };
@@ -375,8 +375,8 @@ export const ServiceDetail: React.FC = () => {
     setConfirmModal({
       open: true,
       type: 'reset-api-key',
-      title: '¿Restablecer API Key del Servicio?',
-      description: 'ADVERTENCIA: La clave de API anterior dejará de funcionar inmediatamente.',
+      title: 'Reset Service API Key?',
+      description: 'WARNING: The previous API key will immediately stop working.',
       variant: 'warning',
     });
   };
@@ -385,8 +385,8 @@ export const ServiceDetail: React.FC = () => {
     setConfirmModal({
       open: true,
       type: 'reset-secret-id',
-      title: '¿Restablecer Secret ID del Servicio?',
-      description: 'ADVERTENCIA: El Secret ID anterior dejará de funcionar inmediatamente.',
+      title: 'Reset Service Secret ID?',
+      description: 'WARNING: The previous Secret ID will immediately stop working.',
       variant: 'warning',
     });
   };
@@ -394,6 +394,7 @@ export const ServiceDetail: React.FC = () => {
   const handleCopyKey = (keyText: string, keyId: string) => {
     navigator.clipboard.writeText(keyText);
     setCopiedKeyId(keyId);
+    toast.success('Key copied to clipboard!');
     setTimeout(() => setCopiedKeyId(null), 2000);
   };
 
@@ -449,7 +450,7 @@ export const ServiceDetail: React.FC = () => {
               className="px-3 py-2 rounded-md text-xs font-medium border border-white/10 hover:bg-white/5 text-zinc-300 flex items-center gap-2 transition-colors duration-200"
             >
               <RefreshCcw className="w-3.5 h-3.5" />
-              Restablecer API Key
+              Reset API Key
             </button>
 
             <button
@@ -458,7 +459,7 @@ export const ServiceDetail: React.FC = () => {
               className="px-3 py-2 rounded-md text-xs font-medium border border-white/10 hover:bg-white/5 text-zinc-300 flex items-center gap-2 transition-colors duration-200"
             >
               <RefreshCcw className="w-3.5 h-3.5" />
-              Restablecer Secret ID
+              Reset Secret ID
             </button>
           </div>
         </div>
@@ -479,19 +480,19 @@ export const ServiceDetail: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="font-semibold text-white text-base">Bot Oficial de Discord (Portal Developer)</h2>
+                <h2 className="font-semibold text-white text-base">Official Discord Bot Integration</h2>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#5865F2]/20 text-[#5865F2] border border-[#5865F2]/30">
                   Slash Commands (/claim, /resethwid)
                 </span>
               </div>
               <p className="text-xs text-zinc-400 mt-0.5">
-                Genera usuarios y licencias automáticas (1 por cuenta de Discord con rol específico) y permite auto-reset de HWID.
+                Automatically issues keys to users with a specific Discord role and allows self-service HWID resets.
               </p>
             </div>
           </div>
 
           <label className="flex items-center gap-2.5 cursor-pointer self-start sm:self-auto bg-black/40 px-3 py-1.5 rounded-lg border border-white/10">
-            <span className="text-xs font-medium text-zinc-300">Estado del Bot:</span>
+            <span className="text-xs font-medium text-zinc-300">Bot Status:</span>
             <input
               type="checkbox"
               checked={discordEnabled}
@@ -499,7 +500,7 @@ export const ServiceDetail: React.FC = () => {
               className="accent-indigo-500 w-4 h-4 cursor-pointer"
             />
             <span className={`text-xs font-bold ${discordEnabled ? 'text-emerald-400' : 'text-zinc-500'}`}>
-              {discordEnabled ? 'ACTIVO' : 'INACTIVO'}
+              {discordEnabled ? 'ACTIVE' : 'INACTIVE'}
             </span>
           </label>
         </div>
@@ -507,19 +508,19 @@ export const ServiceDetail: React.FC = () => {
         {/* Security Rule Badges */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
           <div className="p-3 rounded-lg border border-white/10 bg-black/40 space-y-1">
-            <span className="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">Regla 1: Límite por Cuenta</span>
-            <p className="text-zinc-300 font-medium">1 Sola Key por Usuario</p>
-            <p className="text-[11px] text-zinc-500">Bloquea reclamos duplicados por misma cuenta de Discord.</p>
+            <span className="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">Rule 1: Account Limit</span>
+            <p className="text-zinc-300 font-medium">1 Key per Discord Account</p>
+            <p className="text-[11px] text-zinc-500">Blocks duplicate claims from the same Discord account.</p>
           </div>
           <div className="p-3 rounded-lg border border-white/10 bg-black/40 space-y-1">
-            <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider">Regla 2: Rol Obligatorio</span>
-            <p className="text-zinc-300 font-medium">{discordRoleName || discordRoleId || 'Rol Exclusivo'}</p>
-            <p className="text-[11px] text-zinc-500">Solo usuarios con el rol configurado pueden usar /claim.</p>
+            <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider">Rule 2: Required Role</span>
+            <p className="text-zinc-300 font-medium">{discordRoleName || discordRoleId || 'Exclusive Role'}</p>
+            <p className="text-[11px] text-zinc-500">Only users with the configured role can execute /claim.</p>
           </div>
           <div className="p-3 rounded-lg border border-white/10 bg-black/40 space-y-1">
-            <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Regla 3: Auto-Reset HWID</span>
-            <p className="text-zinc-300 font-medium">Comando /resethwid</p>
-            <p className="text-[11px] text-zinc-500">Elimina el HWID vinculado para pasar a una nueva PC.</p>
+            <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Rule 3: Auto-Reset HWID</span>
+            <p className="text-zinc-300 font-medium">/resethwid Command</p>
+            <p className="text-[11px] text-zinc-500">Removes bound hardware ID for seamless device migration.</p>
           </div>
         </div>
 
@@ -534,47 +535,47 @@ export const ServiceDetail: React.FC = () => {
                   onClick={() => setShowDiscordToken(!showDiscordToken)}
                   className="text-[11px] text-indigo-400 hover:text-indigo-300"
                 >
-                  {showDiscordToken ? 'Ocultar' : 'Revelar Token'}
+                  {showDiscordToken ? 'Hide' : 'Reveal Token'}
                 </button>
               </div>
               <input
                 type={showDiscordToken ? 'text' : 'password'}
                 value={discordToken}
                 onChange={(e) => setDiscordToken(e.target.value)}
-                placeholder="MTI5... (Token de tu aplicación de Discord)"
+                placeholder="MTI5... (Your Discord Application Bot Token)"
                 className="w-full bg-zinc-950 border border-white/10 focus:border-indigo-500 rounded-lg px-3.5 py-2 text-xs text-white font-mono outline-none"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-300">Server ID / Guild ID (Opcional)</label>
+              <label className="text-xs font-semibold text-zinc-300">Server ID / Guild ID (Optional)</label>
               <input
                 type="text"
                 value={discordGuildId}
                 onChange={(e) => setDiscordGuildId(e.target.value)}
-                placeholder="123456789012345678 (ID de tu servidor de Discord)"
+                placeholder="123456789012345678 (Discord Server ID)"
                 className="w-full bg-zinc-950 border border-white/10 focus:border-indigo-500 rounded-lg px-3.5 py-2 text-xs text-white font-mono outline-none"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-300">Nombre del Rol Requerido en Discord</label>
+              <label className="text-xs font-semibold text-zinc-300">Required Role Name in Discord</label>
               <input
                 type="text"
                 value={discordRoleName}
                 onChange={(e) => setDiscordRoleName(e.target.value)}
-                placeholder="ej. Cliente, Comprador, VIP"
+                placeholder="e.g. Client, Buyer, VIP"
                 className="w-full bg-zinc-950 border border-white/10 focus:border-indigo-500 rounded-lg px-3.5 py-2 text-xs text-white outline-none"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-300">ID del Rol Requerido en Discord (Opcional)</label>
+              <label className="text-xs font-semibold text-zinc-300">Required Role ID in Discord (Optional)</label>
               <input
                 type="text"
                 value={discordRoleId}
                 onChange={(e) => setDiscordRoleId(e.target.value)}
-                placeholder="109876543210987654 (Role ID numérico)"
+                placeholder="109876543210987654 (Numeric Role ID)"
                 className="w-full bg-zinc-950 border border-white/10 focus:border-indigo-500 rounded-lg px-3.5 py-2 text-xs text-white font-mono outline-none"
               />
             </div>
@@ -582,14 +583,14 @@ export const ServiceDetail: React.FC = () => {
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
             <div className="text-[11px] text-zinc-400">
-              * Comandos incluidos en el script: <code className="text-indigo-300 font-mono">/claim &lt;usuario&gt;</code> y <code className="text-indigo-300 font-mono">/resethwid &lt;key&gt; &lt;usuario&gt;</code>.
+              * Slash commands supported: <code className="text-indigo-300 font-mono">/claim &lt;username&gt;</code> and <code className="text-indigo-300 font-mono">/resethwid &lt;key&gt; &lt;username&gt;</code>.
             </div>
             <button
               type="submit"
               disabled={savingDiscord}
               className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-lg text-xs font-bold transition-colors duration-200"
             >
-              {savingDiscord ? 'Guardando...' : 'Guardar Configuración de Discord'}
+              {savingDiscord ? 'Saving...' : 'Save Discord Settings'}
             </button>
           </div>
         </form>
@@ -700,24 +701,24 @@ export const ServiceDetail: React.FC = () => {
           >
             <h3 className="font-semibold text-white text-sm flex items-center gap-2">
               <Key className="w-4 h-4 text-emerald-400" />
-              Emisión de Nueva Clave de Licencia
+              Issue New License Key
             </h3>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-medium text-zinc-400">Usuario Asignado</label>
+                <label className="text-[10px] uppercase font-medium text-zinc-400">Assigned User</label>
                 <input
                   type="text"
                   data-testid="new-license-username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="ej. cliente_01"
+                  placeholder="e.g. client_01"
                   className="w-full bg-zinc-950 border border-white/10 focus:border-white/30 rounded px-3 py-2 text-xs text-white outline-none"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-medium text-zinc-400">Rango / Rol</label>
+                <label className="text-[10px] uppercase font-medium text-zinc-400">Rank / Role</label>
                 <select
                   data-testid="new-license-rank"
                   value={rank}
@@ -742,7 +743,7 @@ export const ServiceDetail: React.FC = () => {
               <div className="flex items-center justify-between">
                 <label className="text-xs font-semibold text-white flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-amber-400" />
-                  Duración Personalizable
+                  Custom Duration
                 </label>
                 <div className="flex items-center gap-2">
                   <button
@@ -761,7 +762,7 @@ export const ServiceDetail: React.FC = () => {
                       durationMode === 'custom' ? 'bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30' : 'text-zinc-400 hover:text-white'
                     }`}
                   >
-                    ⚡ Personalizada
+                    ⚡ Custom
                   </button>
                 </div>
               </div>
@@ -779,14 +780,14 @@ export const ServiceDetail: React.FC = () => {
                           : 'border-white/10 bg-white/5 text-zinc-400 hover:text-white'
                       }`}
                     >
-                      {p === 'Lifetime' ? 'Vitalicia' : p}
+                      {p}
                     </button>
                   ))}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
                   <div className="space-y-1">
-                    <label className="text-[10px] text-zinc-400 uppercase">Cantidad</label>
+                    <label className="text-[10px] text-zinc-400 uppercase">Amount</label>
                     <input
                       type="number"
                       min="1"
@@ -797,24 +798,24 @@ export const ServiceDetail: React.FC = () => {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] text-zinc-400 uppercase">Unidad</label>
+                    <label className="text-[10px] text-zinc-400 uppercase">Unit</label>
                     <select
                       value={customUnit}
                       onChange={(e: any) => setCustomUnit(e.target.value)}
                       className="w-full bg-zinc-900 border border-white/15 focus:border-amber-400/50 rounded px-2.5 py-1.5 text-xs text-white font-mono outline-none"
                     >
-                      <option value="Segundos">Segundos (s)</option>
-                      <option value="Minutos">Minutos (m)</option>
-                      <option value="Horas">Horas (h)</option>
-                      <option value="Días">Días (d)</option>
-                      <option value="Semanas">Semanas (w)</option>
-                      <option value="Meses">Meses (mo)</option>
-                      <option value="Años">Años (y)</option>
-                      <option value="Lifetime">Vitalicia (Lifetime)</option>
+                      <option value="Seconds">Seconds (s)</option>
+                      <option value="Minutes">Minutes (m)</option>
+                      <option value="Hours">Hours (h)</option>
+                      <option value="Days">Days (d)</option>
+                      <option value="Weeks">Weeks (w)</option>
+                      <option value="Months">Months (mo)</option>
+                      <option value="Years">Years (y)</option>
+                      <option value="Lifetime">Lifetime</option>
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] text-zinc-400 uppercase">Expiración Exacta</label>
+                    <label className="text-[10px] text-zinc-400 uppercase">Exact Expiration</label>
                     <input
                       type="datetime-local"
                       value={exactDate}
@@ -826,7 +827,7 @@ export const ServiceDetail: React.FC = () => {
               )}
 
               <div className="text-[11px] text-zinc-400 flex items-center gap-1.5">
-                <span>Duración a asignar:</span>
+                <span>Effective Duration:</span>
                 <strong className="text-amber-300 font-mono px-2 py-0.5 rounded bg-amber-400/10 border border-amber-400/20">
                   {getComputedDurationString()}
                 </strong>
@@ -835,25 +836,25 @@ export const ServiceDetail: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-medium text-zinc-400">Pre-Fijar HWID (Opcional)</label>
+                <label className="text-[10px] uppercase font-medium text-zinc-400">Pre-bind HWID (Optional)</label>
                 <input
                   type="text"
                   data-testid="new-license-hwid"
                   value={hwid}
                   onChange={(e) => setHwid(e.target.value)}
-                  placeholder="Dejar vacío para vincular en primer uso"
+                  placeholder="Leave empty to bind on first login"
                   className="w-full bg-zinc-950 border border-white/10 focus:border-white/30 rounded px-3 py-2 text-xs text-white font-mono outline-none"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-medium text-zinc-400">Notas / Metadatos</label>
+                <label className="text-[10px] uppercase font-medium text-zinc-400">Notes / Metadata</label>
                 <input
                   type="text"
                   data-testid="new-license-notes"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="ej. Venta VIP por Discord"
+                  placeholder="e.g. VIP Discord Client / Promotion"
                   className="w-full bg-zinc-950 border border-white/10 focus:border-white/30 rounded px-3 py-2 text-xs text-white outline-none"
                 />
               </div>
@@ -866,14 +867,14 @@ export const ServiceDetail: React.FC = () => {
                 data-testid="submit-new-license"
                 className="bg-[#EEEEEC] hover:bg-white disabled:opacity-50 text-zinc-950 px-4 py-2 rounded text-xs font-semibold transition-colors duration-200"
               >
-                {submittingLicense ? 'Generando...' : 'Emitir Licencia'}
+                {submittingLicense ? 'Generating...' : 'Issue License'}
               </button>
               <button
                 type="button"
                 onClick={() => setShowLicenseForm(false)}
                 className="px-3 py-2 text-xs text-zinc-400 hover:text-white"
               >
-                Cancelar
+                Cancel
               </button>
             </div>
           </form>
@@ -957,33 +958,33 @@ export const ServiceDetail: React.FC = () => {
                     </td>
                     <td className="py-3">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-[10px] text-zinc-400 max-w-[110px] truncate" title={lic.hwid || 'Sin vincular'}>
-                          {lic.hwid || 'Sin vincular'}
+                        <span className="font-mono text-[10px] text-zinc-400 max-w-[110px] truncate" title={lic.hwid || 'Unbound'}>
+                          {lic.hwid || 'Unbound'}
                         </span>
                         {lic.hwid ? (
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => {
                                 navigator.clipboard.writeText(lic.hwid!);
-                                toast.success('HWID copiado');
+                                toast.success('HWID copied to clipboard');
                               }}
                               className="p-1 rounded text-zinc-500 hover:text-white hover:bg-white/10"
-                              title="Copiar HWID"
+                              title="Copy HWID"
                             >
                               <Copy className="w-3 h-3" />
                             </button>
                             <button
-                              onClick={() => handleResetHwid(lic.id, lic.key)}
+                              onClick={() => openResetHwidModal(lic.id)}
                               className="px-2 py-0.5 rounded text-[10px] bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 transition-colors flex items-center gap-1 font-semibold"
-                              title="Desvincular HWID"
+                              title="Unlink and reset HWID"
                             >
                               <Unlink className="w-3 h-3 text-amber-400 shrink-0" />
-                              Desvincular
+                              Unlink
                             </button>
                             <button
                               onClick={() => handleEditHwid(lic.id, lic.hwid || '')}
                               className="p-1 rounded text-zinc-500 hover:text-white hover:bg-white/10"
-                              title="Editar HWID"
+                              title="Edit HWID"
                             >
                               <Edit3 className="w-3 h-3" />
                             </button>
@@ -992,10 +993,10 @@ export const ServiceDetail: React.FC = () => {
                           <button
                             onClick={() => handleEditHwid(lic.id, '')}
                             className="px-1.5 py-0.5 rounded text-[10px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-white/10 transition-colors flex items-center gap-1"
-                            title="Fijar HWID manual"
+                            title="Set HWID manually"
                           >
                             <Lock className="w-2.5 h-2.5" />
-                            Fijar HWID
+                            Set HWID
                           </button>
                         )}
                       </div>
@@ -1015,7 +1016,7 @@ export const ServiceDetail: React.FC = () => {
                           <button
                             onClick={() => handleUpdateLicenseStatus(lic.id, 'active')}
                             className="p-1.5 rounded text-emerald-400 hover:bg-emerald-500/10 transition-colors duration-150"
-                            title="Resume / Activate License"
+                            title="Resume License"
                           >
                             <Play className="w-3.5 h-3.5" />
                           </button>
@@ -1028,7 +1029,7 @@ export const ServiceDetail: React.FC = () => {
                             setEditDurationVal(lic.duration || '30 Days');
                           }}
                           className="p-1.5 rounded text-amber-400 hover:bg-amber-500/10 transition-colors duration-150"
-                          title="Modificar Duración"
+                          title="Edit Duration"
                         >
                           <Clock className="w-3.5 h-3.5" />
                         </button>
@@ -1076,19 +1077,19 @@ export const ServiceDetail: React.FC = () => {
           <div className="bg-[#141413] border border-white/20 rounded-xl p-6 max-w-md w-full space-y-4 shadow-2xl">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <Clock className="w-4 h-4 text-amber-400" />
-              Modificar Duración de Licencia
+              Modify License Duration
             </h3>
             <p className="text-xs text-zinc-400">
-              Clave: <strong className="text-white font-mono">{editingLic.key}</strong>
+              License Key: <strong className="text-white font-mono">{editingLic.key}</strong>
             </p>
 
             <div className="space-y-2">
-              <label className="text-xs text-zinc-300 font-medium">Ingresa nueva duración o plazo:</label>
+              <label className="text-xs text-zinc-300 font-medium">Enter new duration string:</label>
               <input
                 type="text"
                 value={editDurationVal}
                 onChange={(e) => setEditDurationVal(e.target.value)}
-                placeholder="ej. 10 Segundos, 5 Minutos, 12 Horas, Lifetime"
+                placeholder="e.g. 10 Seconds, 5 Minutes, 12 Hours, Lifetime"
                 className="w-full bg-zinc-950 border border-white/15 focus:border-amber-400/50 rounded-lg px-3 py-2 text-xs text-white outline-none font-mono"
               />
               <div className="flex flex-wrap gap-1.5 pt-1">
@@ -1111,14 +1112,14 @@ export const ServiceDetail: React.FC = () => {
                 onClick={() => setEditingLic(null)}
                 className="px-3 py-1.5 rounded text-xs text-zinc-400 hover:text-white"
               >
-                Cancelar
+                Cancel
               </button>
               <button
                 type="button"
                 onClick={handleSaveDurationEdit}
                 className="bg-[#EEEEEC] hover:bg-white text-zinc-950 px-4 py-1.5 rounded-md text-xs font-bold"
               >
-                Guardar Cambios
+                Save Changes
               </button>
             </div>
           </div>
@@ -1131,7 +1132,7 @@ export const ServiceDetail: React.FC = () => {
         open={!!confirmModal?.open}
         title={confirmModal?.title || ''}
         description={confirmModal?.description || ''}
-        confirmLabel="Aceptar"
+        confirmLabel="Confirm"
         confirmVariant={confirmModal?.variant || 'danger'}
         loading={actionLoading}
         onClose={() => setConfirmModal(null)}
