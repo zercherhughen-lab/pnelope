@@ -128,6 +128,7 @@ export default function App() {
           <Routes>
             {/* Landing page style KeyAuth when opening app */}
             <Route path="/" element={<Landing />} />
+            <Route path="/home" element={<Landing />} />
             <Route path="/landing" element={<Landing />} />
             <Route
               path="/login"

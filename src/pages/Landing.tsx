@@ -14,6 +14,7 @@ import {
   FileCode,
   Globe,
   Terminal,
+  CheckCircle2,
 } from 'lucide-react';
 import { VapeLogo } from '../components/VapeLogo';
 import { toast } from 'sonner';
@@ -41,6 +42,10 @@ export const Landing: React.FC = () => {
       <header className="border-b border-white/10 px-6 py-4 flex items-center justify-between max-w-7xl mx-auto w-full relative z-10">
         <div className="flex items-center gap-3">
           <VapeLogo height={26} />
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-white/10 bg-white/5 text-[11px] text-zinc-400 font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>API Online</span>
+          </div>
         </div>
 
         <nav className="hidden md:flex items-center gap-8 text-xs text-zinc-400 font-medium">
@@ -85,8 +90,14 @@ export const Landing: React.FC = () => {
       </header>
 
       {/* Hero Section */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-6 pt-20 pb-24 space-y-16 relative z-10">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-6 pt-16 pb-24 space-y-16 relative z-10">
         <div className="flex flex-col items-center justify-center text-center space-y-6 max-w-3xl mx-auto">
+          {/* Cyber Badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-white/5 border border-white/10 text-zinc-300">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="font-mono text-[11px] uppercase tracking-wider">PROTECCIÓN SHA-256 • LICENCIAS CLOUD • DISCORD BOT</span>
+          </div>
+
           {/* Main Headline */}
           <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-white leading-[1.08]">
             Cloud Licensing, HWID Lock & Bot Automation.
@@ -97,10 +108,10 @@ export const Landing: React.FC = () => {
           </p>
 
           {/* Action CTAs */}
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-3">
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
             <button
               onClick={handleGoogleLogin}
-              className="bg-white text-zinc-950 hover:bg-zinc-200 px-6 py-3.5 rounded-xl font-bold flex items-center gap-2.5 transition-all text-xs shadow-xl active:scale-95"
+              className="bg-white text-zinc-950 hover:bg-zinc-200 px-7 py-3.5 rounded-xl font-bold flex items-center gap-2.5 transition-all text-xs shadow-xl active:scale-95"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
@@ -113,12 +124,44 @@ export const Landing: React.FC = () => {
 
             <Link
               to="/dashboard"
-              className="border border-white/15 bg-white/5 hover:bg-white/10 text-white px-6 py-3.5 rounded-xl font-bold transition-all text-xs flex items-center gap-2 active:scale-95 shadow-sm"
+              className="border border-white/15 bg-white/5 hover:bg-white/10 text-white px-7 py-3.5 rounded-xl font-bold transition-all text-xs flex items-center gap-2 active:scale-95 shadow-sm"
             >
               <span>Abrir Dashboard</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
+        </div>
+
+        {/* Live Interactive Response Preview Box */}
+        <div className="max-w-3xl mx-auto rounded-2xl border border-white/10 bg-[#111110] shadow-2xl overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-zinc-950/80 text-xs">
+            <div className="flex items-center gap-2 font-mono">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block" />
+              <span className="text-zinc-300 font-semibold">POST /api/verify</span>
+              <span className="text-zinc-500">HTTP/2 200 OK • 24ms</span>
+            </div>
+            <span className="text-[11px] text-zinc-400 font-mono">SHA-256 Cryptography</span>
+          </div>
+
+          <pre className="p-5 font-mono text-xs text-zinc-300 overflow-x-auto leading-relaxed bg-[#0c0c0b]">
+            <code>{`{
+  "valid": true,
+  "service": "Vape",
+  "user": {
+    "username": "edgy",
+    "rank": "Developer VIP",
+    "status": "active"
+  },
+  "hardware": {
+    "hwid": "HWID-8FA2-11C0-99E4",
+    "lock": "VERIFIED_LOCKED"
+  },
+  "discord": {
+    "bot_synced": true,
+    "role": "Cliente"
+  }
+}`}</code>
+          </pre>
         </div>
 
         {/* Feature Cards Grid (In Pure Black, White, and Sleek Gray with Improved Monochrome Icons) */}
@@ -162,6 +205,7 @@ export const Landing: React.FC = () => {
           <span>&copy; 2026 Vape Platform. Todos los derechos reservados.</span>
         </div>
         <div className="flex items-center gap-5 text-zinc-400">
+          <Link to="/home" className="hover:text-white transition-colors">Inicio</Link>
           <Link to="/login" className="hover:text-white transition-colors">Iniciar Sesión</Link>
           <Link to="/register" className="hover:text-white transition-colors">Crear Cuenta</Link>
           <Link to="/docs" className="hover:text-white transition-colors">Documentación</Link>

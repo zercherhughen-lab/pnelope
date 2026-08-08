@@ -581,9 +581,15 @@ export const Licenses: React.FC = () => {
             {/* 1. Filter (Navy blue border) */}
             <button
               type="button"
-              onClick={() => setStatusFilter(statusFilter === 'all' ? 'active' : 'all')}
-              title="Filtrar claves"
-              className="flex size-[36px] items-center justify-center rounded-[8px] border border-[#1e3a8a] bg-[#0c1e3e] text-blue-300 hover:brightness-125 transition-all active:scale-95"
+              onClick={() => {
+                const next = statusFilter === 'all' ? 'active' : statusFilter === 'active' ? 'paused' : 'all';
+                setStatusFilter(next);
+                toast.info(`Filtro rápido: ${next === 'all' ? 'Todas las licencias' : next === 'active' ? 'Solo Activas' : 'Solo Pausadas'}`);
+              }}
+              title="Filtrar claves de licencia"
+              className={`flex size-[36px] items-center justify-center rounded-[8px] border transition-all active:scale-95 ${
+                statusFilter !== 'all' ? 'border-blue-400 bg-blue-900/60 text-white shadow-md' : 'border-[#1e3a8a] bg-[#0c1e3e] text-blue-300 hover:brightness-125'
+              }`}
             >
               <Filter className="w-4 h-4" />
             </button>
@@ -594,9 +600,13 @@ export const Licenses: React.FC = () => {
               onClick={() => {
                 setStatusFilter('all');
                 setSearch('');
+                setSelectedServiceId('all');
+                toast.success('Mostrando todas las licencias (Vista Completa)');
               }}
-              title="Ver todas las claves (Grid)"
-              className="flex size-[36px] items-center justify-center rounded-[8px] border border-white bg-[#1a1a19] text-white hover:brightness-125 transition-all active:scale-95"
+              title="Ver todas las claves (Resetear filtros)"
+              className={`flex size-[36px] items-center justify-center rounded-[8px] border transition-all active:scale-95 ${
+                statusFilter === 'all' && !search ? 'border-white bg-[#222220] text-white shadow-md' : 'border-white/30 bg-[#141413] text-zinc-400 hover:text-white'
+              }`}
             >
               <LayoutGrid className="w-4 h-4" />
             </button>
@@ -604,9 +614,14 @@ export const Licenses: React.FC = () => {
             {/* 3. Key (Green border) */}
             <button
               type="button"
-              onClick={() => setStatusFilter('active')}
+              onClick={() => {
+                setStatusFilter('active');
+                toast.success(`Filtrando solo claves activas (${activeCount} activas)`);
+              }}
               title="Solo claves activas"
-              className="flex size-[36px] items-center justify-center rounded-[8px] border border-[#064e3b] bg-[#022c22] text-emerald-400 hover:brightness-125 transition-all active:scale-95"
+              className={`flex size-[36px] items-center justify-center rounded-[8px] border transition-all active:scale-95 ${
+                statusFilter === 'active' ? 'border-emerald-400 bg-emerald-950 text-emerald-300 shadow-md' : 'border-[#064e3b] bg-[#022c22] text-emerald-400 hover:brightness-125'
+              }`}
             >
               <Key className="w-4 h-4" />
             </button>
@@ -614,9 +629,14 @@ export const Licenses: React.FC = () => {
             {/* 4. Timer (Blue border) */}
             <button
               type="button"
-              onClick={() => setStatusFilter('expired')}
-              title="Claves expiradas"
-              className="flex size-[36px] items-center justify-center rounded-[8px] border border-[#1e3a8a] bg-[#0c1e3e] text-blue-400 hover:brightness-125 transition-all active:scale-95"
+              onClick={() => {
+                setStatusFilter('expired');
+                toast.info('Filtrando claves expiradas o por vencer');
+              }}
+              title="Claves expiradas / Por vencer"
+              className={`flex size-[36px] items-center justify-center rounded-[8px] border transition-all active:scale-95 ${
+                statusFilter === 'expired' ? 'border-sky-400 bg-sky-950 text-sky-300 shadow-md' : 'border-[#1e3a8a] bg-[#0c1e3e] text-blue-400 hover:brightness-125'
+              }`}
             >
               <Timer className="w-4 h-4" />
             </button>
@@ -625,7 +645,7 @@ export const Licenses: React.FC = () => {
             <button
               type="button"
               onClick={exportToCSV}
-              title="Exportar archivo CSV"
+              title="Exportar archivo CSV con todas las licencias"
               className="flex size-[36px] items-center justify-center rounded-[8px] border border-[#4c1d95] bg-[#2e1065] text-purple-300 hover:brightness-125 transition-all active:scale-95"
             >
               <FileDown className="w-4 h-4" />
@@ -634,9 +654,14 @@ export const Licenses: React.FC = () => {
             {/* 6. Trash (Red border) */}
             <button
               type="button"
-              onClick={() => setStatusFilter('banned')}
-              title="Claves baneadas / Eliminadas"
-              className="flex size-[36px] items-center justify-center rounded-[8px] border border-[#7f1d1d] bg-[#450a0a] text-red-400 hover:brightness-125 transition-all active:scale-95"
+              onClick={() => {
+                setStatusFilter('banned');
+                toast.error(`Filtrando claves baneadas (${bannedCount} baneadas)`);
+              }}
+              title="Claves baneadas / Eliminación"
+              className={`flex size-[36px] items-center justify-center rounded-[8px] border transition-all active:scale-95 ${
+                statusFilter === 'banned' ? 'border-red-400 bg-red-950 text-red-300 shadow-md' : 'border-[#7f1d1d] bg-[#450a0a] text-red-400 hover:brightness-125'
+              }`}
             >
               <Trash2 className="w-4 h-4" />
             </button>
