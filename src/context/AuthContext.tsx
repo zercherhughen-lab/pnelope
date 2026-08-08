@@ -41,9 +41,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           localStorage.removeItem('vauth_token');
         }
       }
-      
-      // Auto-login as demo user if no valid token present
-      await demoLogin();
       setLoading(false);
     };
 

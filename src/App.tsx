@@ -16,20 +16,18 @@ import Settings from './pages/Settings';
 import Layout from './components/Layout';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, loading, demoLogin } = useAuth();
+  const { user, loading } = useAuth();
 
-  React.useEffect(() => {
-    if (!loading && !user) {
-      demoLogin();
-    }
-  }, [loading, user, demoLogin]);
-
-  if (loading || !user) {
+  if (loading) {
     return (
-      <div data-testid="auth-loading" className="min-h-screen bg-zinc-950 flex items-center justify-center text-zinc-400 text-sm">
-        Abriendo panel de Vape...
+      <div data-testid="auth-loading" className="min-h-screen bg-[#0b0b0a] flex items-center justify-center text-zinc-400 text-sm">
+        Cargando Vape...
       </div>
     );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
   }
 
   return <Layout>{children}</Layout>;
@@ -128,19 +126,9 @@ export default function App() {
             }}
           />
           <Routes>
-            {/* Always land on Dashboard when opening app */}
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/landing"
-              element={<Landing />}
-            />
+            {/* Landing page style KeyAuth when opening app */}
+            <Route path="/" element={<Landing />} />
+            <Route path="/landing" element={<Landing />} />
             <Route
               path="/login"
               element={
