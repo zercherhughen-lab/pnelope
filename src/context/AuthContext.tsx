@@ -22,8 +22,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await api.post('/auth/demo');
       localStorage.setItem('vauth_token', res.data.token);
       setUser(res.data.user);
+      return res.data.user;
     } catch (err) {
       console.error('Failed demo login:', err);
+      throw err;
     }
   };
 
